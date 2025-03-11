@@ -1,4 +1,5 @@
 import base64
+import configparser
 import itertools
 import json
 import os
@@ -6,7 +7,7 @@ import time
 import tkinter as tk
 from functools import lru_cache
 from threading import Thread
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 
 import psycopg2
 import requests
@@ -21,14 +22,10 @@ CHAMPION_MAPPING_FILE = 'champion_mapping.json'
 LOCAL_TEST_DATA = 'local_session.json'
 
 # ------------------ 資料庫配置 ------------------
-import configparser
-
 # 初始化設定解析器
 config = configparser.ConfigParser()
-
 # 讀取 config.ini 檔案
 config.read('config.ini', encoding='utf-8')
-
 # 從 [database] 區塊讀取各項參數
 DB_CONFIG = {
     'host': config['database']['DB_HOST'],
@@ -110,7 +107,8 @@ def recommend_compositions(candidate_pool, predictor):
 
 # ------------------ 核心邏輯類 ------------------
 class DataFetcher:
-    def __init__(self):
+    def __init__(self, lockfile_path=LOCKFILE_PATH):
+        self.lockfile_path = lockfile_path
         self.id_mapping, self.tw_mapping = get_champion_mappings()
         # 建立從英文名稱到 key 的反向映射，用於取得圖片
         self.name_to_key = {v: k for k, v in self.id_mapping.items()}
@@ -126,7 +124,7 @@ class DataFetcher:
 
     def read_lockfile(self):
         try:
-            with open(LOCKFILE_PATH, 'r', encoding='utf-8') as f:
+            with open(self.lockfile_path, 'r', encoding='utf-8') as f:
                 content = f.read().strip()
             parts = content.split(':')
             return {
@@ -197,11 +195,14 @@ STYLE_CONFIG = {
 # ------------------ 主應用程式 ------------------
 class ModernARAMApp:
     def __init__(self, root):
-        self.is_live_mode = True
         self.root = root
         self.root.geometry("1200x800")
         self.root.title("ARAM 勝率助手 - 深色版")
         self.root.configure(bg=STYLE_CONFIG["bg"])
+
+        # 新增設定：lockfile 路徑與語言設定（預設中文）
+        self.lockfile_path = LOCKFILE_PATH
+        self.language = "zh"  # "zh" 表示中文，"en" 表示英文
 
         # 初始化圖片緩存
         self.champ_images = {}
@@ -209,7 +210,7 @@ class ModernARAMApp:
 
         self.setup_ui()
         self.apply_styles()
-        self.fetcher = DataFetcher()
+        self.fetcher = DataFetcher(self.lockfile_path)
         self.predictor = ARAMPredictor()
 
     def load_champion_images(self):
@@ -271,6 +272,14 @@ class ModernARAMApp:
             style="Switch.TCheckbutton"
         )
         self.mode_switch.pack(side=tk.LEFT, padx=5)
+
+        # 新增設定按鈕
+        self.settings_btn = ttk.Button(
+            control_frame,
+            text="設定/setting",
+            command=self.open_settings
+        )
+        self.settings_btn.pack(side=tk.LEFT, padx=5)
 
         self.refresh_btn = ttk.Button(
             control_frame,
@@ -386,14 +395,17 @@ class ModernARAMApp:
         for hero in data['selected']:
             key = self.get_champ_key(hero)
             img = self.champ_images.get(key)
-            hero_tw = self.get_tw_name(hero)
+            if self.language == "zh":
+                display_name = self.get_tw_name(hero)
+            else:
+                display_name = hero
             hero_frame = ttk.Frame(self.selected_frame, padding=5)
             hero_frame.pack(side=tk.LEFT, padx=5, pady=5)
             if img:
                 lbl_img = ttk.Label(hero_frame, image=img)
                 lbl_img.image = img  # 保存參考，避免被垃圾回收
                 lbl_img.pack()
-            ttk.Label(hero_frame, text=hero_tw, font=STYLE_CONFIG["font"], foreground=STYLE_CONFIG["fg"]).pack()
+            ttk.Label(hero_frame, text=display_name, font=STYLE_CONFIG["font"], foreground=STYLE_CONFIG["fg"]).pack()
 
         # 更新候選池（圖片網格）
         for widget in self.candidate_frame.winfo_children():
@@ -407,7 +419,11 @@ class ModernARAMApp:
                 label = ttk.Label(frame, image=self.champ_images[key])
                 label.image = self.champ_images[key]
                 label.pack(side=tk.TOP)
-            ttk.Label(frame, text=self.get_tw_name(hero),
+            if self.language == "zh":
+                display_name = self.get_tw_name(hero)
+            else:
+                display_name = hero
+            ttk.Label(frame, text=display_name,
                       font=STYLE_CONFIG["font"],
                       foreground=STYLE_CONFIG["fg"]).pack(side=tk.BOTTOM)
             frame.grid(row=row, column=col, padx=5, pady=5)
@@ -429,13 +445,61 @@ class ModernARAMApp:
 
         # 顯示推薦的前10個最佳陣容（勝率最高）
         for comp, prob in sorted_compositions[-10:][::-1]:
-            tw_names = [self.get_tw_name(h) for h in comp]
+            if self.language == "zh":
+                names = [self.get_tw_name(h) for h in comp]
+            else:
+                names = list(comp)
             self.result_tree.insert('', tk.END, values=(
                 f"{prob:.2%}",
-                "、".join(tw_names)
+                "、".join(names)
             ))
 
         print(f"計算完成，耗時: {elapsed:.2f}秒")
+
+    def open_settings(self):
+        settings_win = tk.Toplevel(self.root)
+        settings_win.title("設定")
+        settings_win.grab_set()
+
+        # Lockfile 路徑設定
+        lockfile_label = ttk.Label(settings_win, text="Lockfile 位置:")
+        lockfile_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        lockfile_entry = ttk.Entry(settings_win, width=50)
+        lockfile_entry.grid(row=0, column=1, padx=5, pady=5)
+        lockfile_entry.insert(0, self.lockfile_path)
+        browse_btn = ttk.Button(settings_win, text="瀏覽", command=lambda: self.browse_lockfile(lockfile_entry))
+        browse_btn.grid(row=0, column=2, padx=5, pady=5)
+
+        # 語言設定
+        lang_label = ttk.Label(settings_win, text="語言:")
+        lang_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        lang_var = tk.StringVar(value=self.language)
+        rb_zh = ttk.Radiobutton(settings_win, text="中文", variable=lang_var, value="zh")
+        rb_en = ttk.Radiobutton(settings_win, text="english", variable=lang_var, value="en")
+        rb_zh.grid(row=1, column=1, padx=5, pady=5, sticky="w")
+        rb_en.grid(row=1, column=2, padx=5, pady=5, sticky="w")
+
+        # 儲存與取消按鈕
+        save_btn = ttk.Button(settings_win, text="保存",
+                              command=lambda: self.save_settings(lockfile_entry.get(), lang_var.get(), settings_win))
+        save_btn.grid(row=2, column=1, padx=5, pady=10)
+        cancel_btn = ttk.Button(settings_win, text="取消", command=settings_win.destroy)
+        cancel_btn.grid(row=2, column=2, padx=5, pady=10)
+
+    def browse_lockfile(self, entry):
+        file_path = filedialog.askopenfilename(title="選擇 Lockfile",
+                                               filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        if file_path:
+            entry.delete(0, tk.END)
+            entry.insert(0, file_path)
+
+    def save_settings(self, new_lockfile_path, new_lang, win):
+        self.lockfile_path = new_lockfile_path
+        self.language = new_lang
+        # 更新 fetcher 使用新的 lockfile 路徑
+        self.fetcher = DataFetcher(self.lockfile_path)
+        messagebox.showinfo("提示", "設定已保存")
+        win.destroy()
 
 
 if __name__ == "__main__":
