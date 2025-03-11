@@ -12,8 +12,9 @@
 7. ARAMPredictor 類別提供單筆與批量預測功能
 """
 
-import json
+import sys
 import os
+import json
 import pickle
 
 import numpy as np
@@ -26,6 +27,14 @@ from sqlalchemy import create_engine
 from tensorflow.keras import layers, models, Input
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
+# 新增 resource_path 函數，處理 PyInstaller 資源路徑問題
+def resource_path(relative_path):
+    """取得資源檔案的絕對路徑，適用於開發及 PyInstaller環境"""
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 # -------------------- 英雄名稱正規化類別 --------------------
 class ChampionNormalizer:
@@ -75,7 +84,6 @@ class ChampionNormalizer:
                 return self.name_map[k]
         raise ValueError(f"無法識別英雄名稱: {name}，可用名稱：{list(self.name_map.values())}")
 
-
 # -------------------- 資料讀取與處理函數 --------------------
 def fetch_data_from_pgsql():
     DATABASE_URI = "postgresql://postgres:aa030566@localhost:5432/aram"
@@ -83,7 +91,6 @@ def fetch_data_from_pgsql():
     query = "SELECT extract_data FROM model_matches WHERE game_duration > 480;"
     df = pd.read_sql(query, engine)
     return df
-
 
 def process_game_data(df):
     """
@@ -139,7 +146,6 @@ def process_game_data(df):
                 })
     return samples, champion_participant_stats
 
-
 def compute_champion_stats(champion_stats_list):
     """
     計算各英雄統計數據的歷史平均值
@@ -162,7 +168,6 @@ def compute_champion_stats(champion_stats_list):
     for _, row in champion_avg.iterrows():
         champion_stats_dict[row['championName']] = row[feature_columns].values.astype(np.float32)
     return champion_stats_dict, feature_columns
-
 
 def prepare_dataset_v2(samples, champion_stats_dict, feature_columns):
     """
@@ -206,7 +211,6 @@ def prepare_dataset_v2(samples, champion_stats_dict, feature_columns):
 
     return X_ids, X_stats, y, champion_to_idx, scaler
 
-
 # -------------------- 進階神經網路模型建立（優化版） --------------------
 def build_advanced_model_v2(num_champions, num_stats_features, embedding_dim=16):
     # 分支 1：英雄 ID 輸入，利用 Embedding 與 MultiHeadAttention 捕捉英雄間關聯
@@ -247,7 +251,6 @@ def build_advanced_model_v2(num_champions, num_stats_features, embedding_dim=16)
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
     model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
     return model
-
 
 # -------------------- 模型訓練與儲存（優化版） --------------------
 def train_advanced_model_v2():
@@ -298,22 +301,27 @@ def train_advanced_model_v2():
         pickle.dump(champion_stats_dict, f)
     print("進階模型與輔助資料已儲存！")
 
-
 # -------------------- ARAMPredictor 定義（優化版） --------------------
 class ARAMPredictor:
     def __init__(self, model_path="advanced_aram_model_v2.h5",
                  mapping_path="champion_to_idx_v2.pkl",
                  scaler_path="scaler_v2.pkl",
                  champion_stats_path="champion_stats_dict_v2.pkl"):
-        for path in [model_path, mapping_path, scaler_path, champion_stats_path]:
+        # 使用 resource_path 取得正確路徑
+        model_full_path = resource_path(model_path)
+        mapping_full_path = resource_path(mapping_path)
+        scaler_full_path = resource_path(scaler_path)
+        champion_stats_full_path = resource_path(champion_stats_path)
+
+        for path in [model_full_path, mapping_full_path, scaler_full_path, champion_stats_full_path]:
             if not os.path.exists(path):
                 raise FileNotFoundError(f"檔案 {path} 不存在，請先運行 train_advanced_model_v2() 以生成所需檔案。")
-        self.model = tf.keras.models.load_model(model_path)
-        with open(mapping_path, "rb") as f:
+        self.model = tf.keras.models.load_model(model_full_path)
+        with open(mapping_full_path, "rb") as f:
             self.champion_to_idx = pickle.load(f)
-        with open(scaler_path, "rb") as f:
+        with open(scaler_full_path, "rb") as f:
             self.scaler = pickle.load(f)
-        with open(champion_stats_path, "rb") as f:
+        with open(champion_stats_full_path, "rb") as f:
             self.champion_stats_dict = pickle.load(f)
         # 建立名稱正規化器
         self.normalizer = ChampionNormalizer()
@@ -387,7 +395,6 @@ class ARAMPredictor:
         results = predictions[:, 0].tolist()
 
         return results
-
 
 # -------------------- 主程式 --------------------
 if __name__ == "__main__":

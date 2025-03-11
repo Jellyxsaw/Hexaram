@@ -1,8 +1,6 @@
 import base64
-import configparser
 import itertools
 import json
-import os
 import time
 import tkinter as tk
 from functools import lru_cache
@@ -20,12 +18,27 @@ from chatDeep import ARAMPredictor
 LOCKFILE_PATH = r"C:\Riot Games\League of Legends\lockfile"
 CHAMPION_MAPPING_FILE = 'champion_mapping.json'
 LOCAL_TEST_DATA = 'local_session.json'
+import sys
+import os
+import configparser
 
-# ------------------ 資料庫配置 ------------------
-# 初始化設定解析器
+
+def get_resource_path(relative_path):
+    # 如果被打包，sys._MEIPASS 會指向臨時目錄
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+
+config_path = get_resource_path("config.ini")
+
 config = configparser.ConfigParser()
-# 讀取 config.ini 檔案
-config.read('config.ini', encoding='utf-8')
+read_files = config.read(config_path, encoding='utf-8')
+if not read_files:
+    raise FileNotFoundError(f"無法讀取設定檔：{config_path}")
+# ------------------ 資料庫配置 ------------------
 # 從 [database] 區塊讀取各項參數
 DB_CONFIG = {
     'host': config['database']['DB_HOST'],

@@ -89,9 +89,9 @@ def get_account_data(game_name, tag_line):
         return None
 
 
-def get_match_ids(puuid, count=100, queue=450):
+def get_match_ids(puuid, count=200, queue=450):
     """
-    取得前一百筆兩個月內的對局 id
+    取得前N筆兩個月內的對局 id
     """
     url = f"https://{REGION_MATCH}.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids"
     two_months_ago = int(time.time() - 60 * 24 * 3600)  # 60 天前的 epoch timestamp
