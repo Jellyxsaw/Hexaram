@@ -31,11 +31,11 @@ config.read('config.ini', encoding='utf-8')
 
 # 從 [database] 區塊讀取各項參數
 DB_CONFIG = {
-    'host': config['database']['host'],
-    'port': config.getint('database', 'port'),
-    'user': config['database']['user'],
-    'password': config['database']['password'],
-    'database': config['database']['database']
+    'host': config['database']['DB_HOST'],
+    'port': config.getint('database', 'DB_PORT'),
+    'user': config['database']['DB_USER'],
+    'password': config['database']['DB_PASSWORD'],
+    'database': config['database']['DB_NAME']
 }
 
 
