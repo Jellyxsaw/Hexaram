@@ -27,7 +27,7 @@ import configparser
 config = configparser.ConfigParser()
 
 # 讀取 config.ini 檔案
-config.read('config.ini')
+config.read('config.ini', encoding='utf-8')
 
 # 從 [database] 區塊讀取各項參數
 DB_CONFIG = {

@@ -1,28 +1,35 @@
-import requests
-import json
-import psycopg2
-from psycopg2.extras import Json
-from datetime import datetime
+import configparser
 import time
+from datetime import datetime
+
+import psycopg2
+import requests
+from psycopg2.extras import Json
+
+# 建立設定解析器
+config = configparser.ConfigParser()
+config.read('config.ini', encoding='utf-8')
 
 # =========== API 參數 ===========
-API_KEY = "RGAPI-536e65e2-a185-499b-8667-128fc020b866"
-REGION_ACCOUNT = "asia"  # 用於 Account API 的區域（例如：asia）
-REGION_MATCH = "SEA"     # 用於 Match-V5 API 的區域（例如：SEA）
-GAME_NAME = "pinkyJelly" # 初始種子召喚師的名稱
-TAG_LINE = "RxMoo"       # 初始種子召喚師的 TagLine
+API_KEY = config.get('api-key', 'API_KEY')
+REGION_ACCOUNT = config.get('api-key', 'REGION_ACCOUNT')
+REGION_MATCH = config.get('api-key', 'REGION_MATCH')
+GAME_NAME = config.get('api-key', 'GAME_NAME')
+TAG_LINE = config.get('api-key', 'TAG_LINE')
 
 # =========== 資料庫連線參數 ===========
-DB_HOST = "localhost"
-DB_PORT = 5432
-DB_NAME = "aram"
-DB_USER = "postgres"
-DB_PASSWORD = "aa030566"
+DB_HOST = config.get('database', 'DB_HOST')
+DB_PORT = config.getint('database', 'DB_PORT')
+DB_NAME = config.get('database', 'DB_NAME')
+DB_USER = config.get('database', 'DB_USER')
+DB_PASSWORD = config.get('database', 'DB_PASSWORD')
+
 
 # =========== DB 函式 ===========
 def get_db_connection():
     conn = psycopg2.connect(host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD)
     return conn
+
 
 def get_first_unsearched_summoner(conn):
     with conn.cursor() as cur:
@@ -33,6 +40,7 @@ def get_first_unsearched_summoner(conn):
         else:
             return None
 
+
 def mark_summoner_as_searched(conn, puuid):
     with conn.cursor() as cur:
         cur.execute("""
@@ -41,6 +49,7 @@ def mark_summoner_as_searched(conn, puuid):
             WHERE puuid = %s
         """, (puuid,))
     conn.commit()
+
 
 def insert_summoner_if_not_exists(conn, puuid, summoner_name=None, riot_id_game_name=None, riot_id_tagline=None):
     with conn.cursor() as cur:
@@ -55,15 +64,18 @@ def insert_summoner_if_not_exists(conn, puuid, summoner_name=None, riot_id_game_
             conn.rollback()
             print("insert_summoner_if_not_exists error:", e)
 
+
 def match_exists(conn, match_id):
     with conn.cursor() as cur:
         cur.execute("SELECT 1 FROM model_matches WHERE match_id = %s", (match_id,))
         return cur.fetchone() is not None
 
+
 def count_matches(conn):
     with conn.cursor() as cur:
         cur.execute("SELECT COUNT(*) FROM model_matches")
         return cur.fetchone()[0]
+
 
 # =========== API 函式 ===========
 def get_account_data(game_name, tag_line):
@@ -75,6 +87,7 @@ def get_account_data(game_name, tag_line):
     else:
         print("取得帳戶資料錯誤:", response.status_code, response.text)
         return None
+
 
 def get_match_ids(puuid, count=100, queue=450):
     """
@@ -98,6 +111,7 @@ def get_match_ids(puuid, count=100, queue=450):
         print("取得比賽 id 錯誤:", response.status_code, response.text)
         return None
 
+
 def get_match_details(match_id):
     url = f"https://{REGION_MATCH}.api.riotgames.com/lol/match/v5/matches/{match_id}"
     params = {"api_key": API_KEY}
@@ -107,6 +121,7 @@ def get_match_details(match_id):
     else:
         print(f"取得比賽 {match_id} 詳細資料錯誤:", response.status_code, response.text)
         return None
+
 
 # =========== 資料擷取函式 ===========
 def extract_features(match_data):
@@ -158,11 +173,12 @@ def extract_features(match_data):
             p_feats["gold_per_damage_dealt"] = 0
 
         total_effort = (
-            p_feats["total_damage_dealt_to_champions"] +
-            p_feats["total_damage_taken"] +
-            (p_feats["time_ccing_others"] * cc_scale) +
-            (p_feats["total_heal"] + p_feats["total_heals_on_teammates"] + p_feats["total_damage_shielded_on_teammates"]) +
-            p_feats["damage_self_mitigated"]
+                p_feats["total_damage_dealt_to_champions"] +
+                p_feats["total_damage_taken"] +
+                (p_feats["time_ccing_others"] * cc_scale) +
+                (p_feats["total_heal"] + p_feats["total_heals_on_teammates"] + p_feats[
+                    "total_damage_shielded_on_teammates"]) +
+                p_feats["damage_self_mitigated"]
         )
         if total_effort > 0:
             p_feats["gold_conversion_efficiency"] = p_feats["gold_earned"] / total_effort
@@ -197,9 +213,11 @@ def extract_features(match_data):
 
     if 100 in team_features and 200 in team_features:
         features["team_gold_diff"] = team_features[100]["total_gold"] - team_features[200]["total_gold"]
-        features["team_damage_diff"] = team_features[100]["total_damage_dealt"] - team_features[200]["total_damage_dealt"]
+        features["team_damage_diff"] = team_features[100]["total_damage_dealt"] - team_features[200][
+            "total_damage_dealt"]
 
     return features
+
 
 # =========== 資料庫資料插入函式 ===========
 def extract_match_info(raw_match):
@@ -218,12 +236,16 @@ def extract_match_info(raw_match):
         "platformId": info.get("platformId"),
         "tournamentCode": info.get("tournamentCode"),
         "gameName": info.get("gameName"),
-        "gameCreation": datetime.fromtimestamp(info.get("gameCreation", 0) / 1000).strftime('%Y-%m-%d %H:%M:%S') if info.get("gameCreation") else None,
+        "gameCreation": datetime.fromtimestamp(info.get("gameCreation", 0) / 1000).strftime(
+            '%Y-%m-%d %H:%M:%S') if info.get("gameCreation") else None,
         "gameDuration": info.get("gameDuration"),
-        "gameStartTimestamp": datetime.fromtimestamp(info.get("gameStartTimestamp", 0) / 1000).strftime('%Y-%m-%d %H:%M:%S') if info.get("gameStartTimestamp") else None,
-        "gameEndTimestamp": datetime.fromtimestamp(info.get("gameEndTimestamp", 0) / 1000).strftime('%Y-%m-%d %H:%M:%S') if info.get("gameEndTimestamp") else None,
+        "gameStartTimestamp": datetime.fromtimestamp(info.get("gameStartTimestamp", 0) / 1000).strftime(
+            '%Y-%m-%d %H:%M:%S') if info.get("gameStartTimestamp") else None,
+        "gameEndTimestamp": datetime.fromtimestamp(info.get("gameEndTimestamp", 0) / 1000).strftime(
+            '%Y-%m-%d %H:%M:%S') if info.get("gameEndTimestamp") else None,
     }
     return match_info
+
 
 def insert_match(conn, raw_match):
     """
@@ -257,13 +279,14 @@ def insert_match(conn, raw_match):
                 match_info.get("gameDuration"),
                 match_info.get("gameStartTimestamp"),
                 match_info.get("gameEndTimestamp"),
-                Json(raw_match),      # 儲存原始 JSON 資料
-                Json(features)        # 儲存擷取後的精細資料
+                Json(raw_match),  # 儲存原始 JSON 資料
+                Json(features)  # 儲存擷取後的精細資料
             ))
             conn.commit()
         except Exception as e:
             conn.rollback()
             print("insert_match error:", e)
+
 
 # =========== 主流程 ===========
 def main():
@@ -319,6 +342,7 @@ def main():
 
     print("達到目標對局數量:", count_matches(conn))
     conn.close()
+
 
 if __name__ == "__main__":
     main()
