@@ -6,6 +6,13 @@
 
 ---
 
+## 單純使用者
+
+直接去release區下載最新版本(如果有的話)
+如果讀取不到現場遊戲 請去檢查lockfile 會在你安裝LOL的資料夾裡面 預設位置 "C:\Riot Games\League of Legends\lockfile" 自己改一下
+
+---
+
 ## 目錄
 - [專案簡介](#專案簡介)
 - [功能介紹](#功能介紹)
@@ -67,3 +74,7 @@ project/
 ├── champion_to_idx_v2.pkl   # 英雄名稱與索引映射檔 (生成後存在)
 ├── scaler_v2.pkl            # StandardScaler 模型 (生成後存在)
 └── champion_stats_dict_v2.pkl # 英雄統計數據 (生成後存在)
+
+---
+
+
