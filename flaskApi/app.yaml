@@ -1,0 +1,9 @@
+runtime: python310
+
+instance_class: F4
+
+entrypoint: gunicorn -b :$PORT app:app
+
+handlers:
+  - url: /.*
+    script: auto

@@ -1,0 +1,512 @@
+{
+  "Aatrox": {
+    "key": 266
+  },
+  "Ahri": {
+    "key": 103
+  },
+  "Akali": {
+    "key": 84
+  },
+  "Akshan": {
+    "key": 166
+  },
+  "Alistar": {
+    "key": 12
+  },
+  "Ambessa": {
+    "key": 799
+  },
+  "Amumu": {
+    "key": 32
+  },
+  "Anivia": {
+    "key": 34
+  },
+  "Annie": {
+    "key": 1
+  },
+  "Aphelios": {
+    "key": 523
+  },
+  "Ashe": {
+    "key": 22
+  },
+  "Aurelion Sol": {
+    "key": 136
+  },
+  "Aurora": {
+    "key": 893
+  },
+  "Azir": {
+    "key": 268
+  },
+  "Bard": {
+    "key": 432
+  },
+  "Bel'Veth": {
+    "key": 200
+  },
+  "Blitzcrank": {
+    "key": 53
+  },
+  "Brand": {
+    "key": 63
+  },
+  "Braum": {
+    "key": 201
+  },
+  "Briar": {
+    "key": 233
+  },
+  "Caitlyn": {
+    "key": 51
+  },
+  "Camille": {
+    "key": 164
+  },
+  "Cassiopeia": {
+    "key": 69
+  },
+  "Cho'Gath": {
+    "key": 31
+  },
+  "Corki": {
+    "key": 42
+  },
+  "Darius": {
+    "key": 122
+  },
+  "Diana": {
+    "key": 131
+  },
+  "Draven": {
+    "key": 119
+  },
+  "Dr. Mundo": {
+    "key": 36
+  },
+  "Ekko": {
+    "key": 245
+  },
+  "Elise": {
+    "key": 60
+  },
+  "Evelynn": {
+    "key": 28
+  },
+  "Ezreal": {
+    "key": 81
+  },
+  "Fiddlesticks": {
+    "key": 9
+  },
+  "Fiora": {
+    "key": 114
+  },
+  "Fizz": {
+    "key": 105
+  },
+  "Galio": {
+    "key": 3
+  },
+  "Gangplank": {
+    "key": 41
+  },
+  "Garen": {
+    "key": 86
+  },
+  "Gnar": {
+    "key": 150
+  },
+  "Gragas": {
+    "key": 79
+  },
+  "Graves": {
+    "key": 104
+  },
+  "Gwen": {
+    "key": 887
+  },
+  "Hecarim": {
+    "key": 120
+  },
+  "Heimerdinger": {
+    "key": 74
+  },
+  "Hwei": {
+    "key": 910
+  },
+  "Illaoi": {
+    "key": 420
+  },
+  "Irelia": {
+    "key": 39
+  },
+  "Ivern": {
+    "key": 427
+  },
+  "Janna": {
+    "key": 40
+  },
+  "Jarvan IV": {
+    "key": 59
+  },
+  "Jax": {
+    "key": 24
+  },
+  "Jayce": {
+    "key": 126
+  },
+  "Jhin": {
+    "key": 202
+  },
+  "Jinx": {
+    "key": 222
+  },
+  "Kai'Sa": {
+    "key": 145
+  },
+  "Kalista": {
+    "key": 429
+  },
+  "Karma": {
+    "key": 43
+  },
+  "Karthus": {
+    "key": 30
+  },
+  "Kassadin": {
+    "key": 38
+  },
+  "Katarina": {
+    "key": 55
+  },
+  "Kayle": {
+    "key": 10
+  },
+  "Kayn": {
+    "key": 141
+  },
+  "Kennen": {
+    "key": 85
+  },
+  "Kha'Zix": {
+    "key": 121
+  },
+  "Kindred": {
+    "key": 203
+  },
+  "Kled": {
+    "key": 240
+  },
+  "Kog'Maw": {
+    "key": 96
+  },
+  "K'Sante": {
+    "key": 897
+  },
+  "LeBlanc": {
+    "key": 7
+  },
+  "Lee Sin": {
+    "key": 64
+  },
+  "Leona": {
+    "key": 89
+  },
+  "Lillia": {
+    "key": 876
+  },
+  "Lissandra": {
+    "key": 127
+  },
+  "Lucian": {
+    "key": 236
+  },
+  "Lulu": {
+    "key": 117
+  },
+  "Lux": {
+    "key": 99
+  },
+  "Malphite": {
+    "key": 54
+  },
+  "Malzahar": {
+    "key": 90
+  },
+  "Maokai": {
+    "key": 57
+  },
+  "Master Yi": {
+    "key": 11
+  },
+  "Mel": {
+    "key": 800
+  },
+  "Milio": {
+    "key": 902
+  },
+  "Miss Fortune": {
+    "key": 21
+  },
+  "Mordekaiser": {
+    "key": 82
+  },
+  "Morgana": {
+    "key": 25
+  },
+  "Naafiri": {
+    "key": 950
+  },
+  "Nami": {
+    "key": 267
+  },
+  "Nasus": {
+    "key": 75
+  },
+  "Nautilus": {
+    "key": 111
+  },
+  "Neeko": {
+    "key": 518
+  },
+  "Nidalee": {
+    "key": 76
+  },
+  "Nilah": {
+    "key": 895
+  },
+  "Nocturne": {
+    "key": 56
+  },
+  "Nunu & Willump": {
+    "key": 20
+  },
+  "Olaf": {
+    "key": 2
+  },
+  "Orianna": {
+    "key": 61
+  },
+  "Ornn": {
+    "key": 516
+  },
+  "Pantheon": {
+    "key": 80
+  },
+  "Poppy": {
+    "key": 78
+  },
+  "Pyke": {
+    "key": 555
+  },
+  "Qiyana": {
+    "key": 246
+  },
+  "Quinn": {
+    "key": 133
+  },
+  "Rakan": {
+    "key": 497
+  },
+  "Rammus": {
+    "key": 33
+  },
+  "Rek'Sai": {
+    "key": 421
+  },
+  "Rell": {
+    "key": 526
+  },
+  "Renata Glasc": {
+    "key": 888
+  },
+  "Renekton": {
+    "key": 58
+  },
+  "Rengar": {
+    "key": 107
+  },
+  "Riven": {
+    "key": 92
+  },
+  "Rumble": {
+    "key": 68
+  },
+  "Ryze": {
+    "key": 13
+  },
+  "Samira": {
+    "key": 360
+  },
+  "Sejuani": {
+    "key": 113
+  },
+  "Senna": {
+    "key": 235
+  },
+  "Seraphine": {
+    "key": 147
+  },
+  "Sett": {
+    "key": 875
+  },
+  "Shaco": {
+    "key": 35
+  },
+  "Shen": {
+    "key": 98
+  },
+  "Shyvana": {
+    "key": 102
+  },
+  "Singed": {
+    "key": 27
+  },
+  "Sion": {
+    "key": 14
+  },
+  "Sivir": {
+    "key": 15
+  },
+  "Skarner": {
+    "key": 72
+  },
+  "Smolder": {
+    "key": 901
+  },
+  "Sona": {
+    "key": 37
+  },
+  "Soraka": {
+    "key": 16
+  },
+  "Swain": {
+    "key": 50
+  },
+  "Sylas": {
+    "key": 517
+  },
+  "Syndra": {
+    "key": 134
+  },
+  "Tahm Kench": {
+    "key": 223
+  },
+  "Taliyah": {
+    "key": 163
+  },
+  "Talon": {
+    "key": 91
+  },
+  "Taric": {
+    "key": 44
+  },
+  "Teemo": {
+    "key": 17
+  },
+  "Thresh": {
+    "key": 412
+  },
+  "Tristana": {
+    "key": 18
+  },
+  "Trundle": {
+    "key": 48
+  },
+  "Tryndamere": {
+    "key": 23
+  },
+  "Twisted Fate": {
+    "key": 4
+  },
+  "Twitch": {
+    "key": 29
+  },
+  "Udyr": {
+    "key": 77
+  },
+  "Urgot": {
+    "key": 6
+  },
+  "Varus": {
+    "key": 110
+  },
+  "Vayne": {
+    "key": 67
+  },
+  "Veigar": {
+    "key": 45
+  },
+  "Vel'Koz": {
+    "key": 161
+  },
+  "Vex": {
+    "key": 711
+  },
+  "Vi": {
+    "key": 254
+  },
+  "Viego": {
+    "key": 234
+  },
+  "Viktor": {
+    "key": 112
+  },
+  "Vladimir": {
+    "key": 8
+  },
+  "Volibear": {
+    "key": 106
+  },
+  "Warwick": {
+    "key": 19
+  },
+  "Xayah": {
+    "key": 498
+  },
+  "Xerath": {
+    "key": 101
+  },
+  "Xin Zhao": {
+    "key": 5
+  },
+  "Yasuo": {
+    "key": 157
+  },
+  "Yone": {
+    "key": 777
+  },
+  "Yorick": {
+    "key": 83
+  },
+  "Yuumi": {
+    "key": 350
+  },
+  "Zac": {
+    "key": 154
+  },
+  "Zed": {
+    "key": 238
+  },
+  "Zeri": {
+    "key": 221
+  },
+  "Ziggs": {
+    "key": 115
+  },
+  "Zilean": {
+    "key": 26
+  },
+  "Zoe": {
+    "key": 142
+  },
+  "Zyra": {
+    "key": 143
+  },
+  "MonkeyKing": {
+    "key": 62
+  }
+}
