@@ -3,11 +3,10 @@
 block_cipher = None
 
 a = Analysis(
-    ['deepApp1.py'],
+    ['pureApp.py'],
     pathex=[],
     binaries=[],
     datas=[
-        ('config.ini', '.'),
         ('champion_mapping.json', '.'),
         ('chinese_mapping.json', '.'),
         ('local_session.json', '.'),
@@ -21,8 +20,6 @@ a = Analysis(
         'requests',
         'urllib3',
         'certifi',
-        'psycopg2',
-        'psycopg2._psycopg',
         'sklearn.utils._weight_vector',
         'sklearn.neighbors._partition_nodes'
     ],

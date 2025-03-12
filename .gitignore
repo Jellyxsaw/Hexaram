@@ -4,3 +4,4 @@ dist
 build
 appTest.rar
 __pycache__
+*.rar

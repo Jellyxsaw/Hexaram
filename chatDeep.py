@@ -12,20 +12,20 @@
 7. ARAMPredictor 類別提供單筆與批量預測功能
 """
 
-import sys
-import os
 import json
+import os
 import pickle
+import sys
 
 import numpy as np
 import pandas as pd
-import psycopg2
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sqlalchemy import create_engine
 from tensorflow.keras import layers, models, Input
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+
 
 # 新增 resource_path 函數，處理 PyInstaller 資源路徑問題
 def resource_path(relative_path):
@@ -36,6 +36,7 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
+
 # -------------------- 英雄名稱正規化類別 --------------------
 class ChampionNormalizer:
     def __init__(self):
@@ -44,22 +45,25 @@ class ChampionNormalizer:
         self._add_special_cases()
 
     def _load_champion_list(self):
-        # 請根據實際情況調整資料庫連線資訊
-        conn = psycopg2.connect(
-            host="localhost",
-            port="5432",
-            database="aram",
-            user="postgres",
-            password="aa030566"
-        )
-        df = pd.read_sql("SELECT hero_name, hero_tw_name, key FROM champion_list", conn)
-        conn.close()
-        for _, row in df.iterrows():
-            self._add_mapping(row['hero_name'])
-            self._add_mapping(row['hero_tw_name'])
-            self._add_mapping(str(row['key']))
+        # 從 champion_mapping.json 讀取資料
+        with open("champion_mapping.json", "r", encoding="utf-8") as f:
+            champion_data = json.load(f)
+        # 從 chinese_mapping.json 讀取中文對應資料
+        with open("chinese_mapping.json", "r", encoding="utf-8") as f:
+            chinese_data = json.load(f)
+
+        # 依據 champion_mapping 的資料來加入映射
+        for champion, info in champion_data.items():
+            # 加入英文名稱
+            self._add_mapping(champion)
+            # 若有對應的中文名稱則加入
+            if champion in chinese_data:
+                self._add_mapping(chinese_data[champion])
+            # 將 key (數字) 轉為字串後也加入映射
+            self._add_mapping(str(info["key"]))
 
     def _add_mapping(self, name):
+        # 標準化字串處理：轉小寫、移除空格、連字符與單引號
         standardized = name.lower().replace("'", "").replace(" ", "").replace("-", "")
         self.name_map[standardized] = name
 
@@ -84,6 +88,7 @@ class ChampionNormalizer:
                 return self.name_map[k]
         raise ValueError(f"無法識別英雄名稱: {name}，可用名稱：{list(self.name_map.values())}")
 
+
 # -------------------- 資料讀取與處理函數 --------------------
 def fetch_data_from_pgsql():
     DATABASE_URI = "postgresql://postgres:aa030566@localhost:5432/aram"
@@ -91,6 +96,7 @@ def fetch_data_from_pgsql():
     query = "SELECT extract_data FROM model_matches WHERE game_duration > 480;"
     df = pd.read_sql(query, engine)
     return df
+
 
 def process_game_data(df):
     """
@@ -146,6 +152,7 @@ def process_game_data(df):
                 })
     return samples, champion_participant_stats
 
+
 def compute_champion_stats(champion_stats_list):
     """
     計算各英雄統計數據的歷史平均值
@@ -168,6 +175,7 @@ def compute_champion_stats(champion_stats_list):
     for _, row in champion_avg.iterrows():
         champion_stats_dict[row['championName']] = row[feature_columns].values.astype(np.float32)
     return champion_stats_dict, feature_columns
+
 
 def prepare_dataset_v2(samples, champion_stats_dict, feature_columns):
     """
@@ -211,6 +219,7 @@ def prepare_dataset_v2(samples, champion_stats_dict, feature_columns):
 
     return X_ids, X_stats, y, champion_to_idx, scaler
 
+
 # -------------------- 進階神經網路模型建立（優化版） --------------------
 def build_advanced_model_v2(num_champions, num_stats_features, embedding_dim=16):
     # 分支 1：英雄 ID 輸入，利用 Embedding 與 MultiHeadAttention 捕捉英雄間關聯
@@ -251,6 +260,7 @@ def build_advanced_model_v2(num_champions, num_stats_features, embedding_dim=16)
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
     model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
     return model
+
 
 # -------------------- 模型訓練與儲存（優化版） --------------------
 def train_advanced_model_v2():
@@ -300,6 +310,7 @@ def train_advanced_model_v2():
     with open("champion_stats_dict_v2.pkl", "wb") as f:
         pickle.dump(champion_stats_dict, f)
     print("進階模型與輔助資料已儲存！")
+
 
 # -------------------- ARAMPredictor 定義（優化版） --------------------
 class ARAMPredictor:
@@ -395,6 +406,7 @@ class ARAMPredictor:
         results = predictions[:, 0].tolist()
 
         return results
+
 
 # -------------------- 主程式 --------------------
 if __name__ == "__main__":
