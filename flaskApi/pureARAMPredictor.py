@@ -1,4 +1,3 @@
-# 新增 resource_path 函數，處理 PyInstaller 資源路徑問題
 import json
 import os
 import pickle
@@ -6,6 +5,8 @@ import sys
 
 import numpy as np
 import tensorflow as tf
+
+from gcsWorker import download_blob
 
 
 # -------------------- 英雄名稱正規化類別 --------------------
@@ -60,6 +61,7 @@ class ChampionNormalizer:
         raise ValueError(f"無法識別英雄名稱: {name}，可用名稱：{list(self.name_map.values())}")
 
 
+# -------------------- 資源路徑輔助函式 --------------------
 def resource_path(relative_path):
     """取得資源檔案的絕對路徑，適用於開發及 PyInstaller環境"""
     try:
@@ -69,20 +71,41 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
+# -------------------- ARAM 勝率預測器類別 --------------------
 class ARAMPredictor:
-    def __init__(self, model_path="advanced_aram_model_v2.h5",
-                 mapping_path="champion_to_idx_v2.pkl",
-                 scaler_path="scaler_v2.pkl",
-                 champion_stats_path="champion_stats_dict_v2.pkl"):
-        # 使用 resource_path 取得正確路徑
-        model_full_path = resource_path(model_path)
-        mapping_full_path = resource_path(mapping_path)
-        scaler_full_path = resource_path(scaler_path)
-        champion_stats_full_path = resource_path(champion_stats_path)
+    def __init__(self, bucket_name, gcs_prefix=""):
+        """
+        參數:
+        bucket_name (str): GCS Bucket 名稱
+        gcs_prefix (str): GCS 上的資料路徑前置字串（例如 "models/"），若無則可設為空字串
+        """
+        self.bucket_name = bucket_name
 
+        # 定義本機檔案名稱與 GCS 上的對應檔案路徑（可依需求修改）
+        self.model_file = "advanced_aram_model_v2.h5"
+        self.mapping_file = "champion_to_idx_v2.pkl"
+        self.scaler_file = "scaler_v2.pkl"
+        self.champion_stats_file = "champion_stats_dict_v2.pkl"
+
+        # 下載資源
+        download_blob(bucket_name, self.model_file, os.path.join(gcs_prefix, self.model_file))
+        download_blob(bucket_name, self.mapping_file, os.path.join(gcs_prefix, self.mapping_file))
+        download_blob(bucket_name, self.scaler_file, os.path.join(gcs_prefix, self.scaler_file))
+        download_blob(bucket_name, self.champion_stats_file,
+                      os.path.join(gcs_prefix, self.champion_stats_file))
+
+        # 取得正確的本機路徑
+        model_full_path = resource_path(self.model_file)
+        mapping_full_path = resource_path(self.mapping_file)
+        scaler_full_path = resource_path(self.scaler_file)
+        champion_stats_full_path = resource_path(self.champion_stats_file)
+
+        # 檢查檔案是否存在（理論上經過 download_resource_if_needed 應該都存在）
         for path in [model_full_path, mapping_full_path, scaler_full_path, champion_stats_full_path]:
             if not os.path.exists(path):
-                raise FileNotFoundError(f"檔案 {path} 不存在，請先運行 train_advanced_model_v2() 以生成所需檔案。")
+                raise FileNotFoundError(f"檔案 {path} 不存在，請確認 GCS 上有對應檔案並檢查下載權限。")
+
+        # 載入模型與資源
         self.model = tf.keras.models.load_model(model_full_path)
         with open(mapping_full_path, "rb") as f:
             self.champion_to_idx = pickle.load(f)
@@ -160,5 +183,4 @@ class ARAMPredictor:
         X_stats = X_stats_flat.reshape(batch_size, num_champs, num_features)
         predictions = self.model.predict([X_ids, X_stats])
         results = predictions[:, 0].tolist()
-
         return results

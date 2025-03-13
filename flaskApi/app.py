@@ -1,3 +1,4 @@
+import configparser
 import itertools
 
 from flasgger import Swagger
@@ -7,6 +8,11 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from apilogger import register_api_logger
 from extensions import db, db_uri
 from pureARAMPredictor import ARAMPredictor
+
+# 讀取 config.ini 設定檔
+config = configparser.ConfigParser()
+config.read('config.ini', encoding='utf-8')
+bucket_name = config['gcs']['BUCKET_NAME']
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
@@ -21,7 +27,7 @@ db.init_app(app)
 register_api_logger(app)
 
 # 建立模型預測器實例
-predictor = ARAMPredictor()
+predictor = ARAMPredictor(bucket_name)
 
 
 @app.route('/predict_team', methods=['POST'])
@@ -97,6 +103,60 @@ def predict_team():
 @app.route('/example', methods=['GET'])
 def example():
     return jsonify({'message': '這是一個 API 回應'})
+
+
+@app.route('/reload_model', methods=['POST'])
+def reload_model():
+    """
+    重新加載模型與資源 (需驗證密碼)
+    ---
+    tags:
+      - 管理 API
+    parameters:
+      - in: header
+        name: X-API-PASSWORD
+        type: string
+        required: true
+        description: 驗證密碼
+    responses:
+      200:
+        description: 模型重新加載成功
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+      401:
+        description: 未授權的訪問
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+      500:
+        description: 模型重新加載失敗
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+    """
+    global predictor
+    # 從 config.ini 讀取預設的 API 密碼
+    expected_password = config['security']['API_PASSWORD']
+    # 從 HTTP Header 中獲取使用者提供的密碼
+    provided_password = request.headers.get('X-API-PASSWORD')
+
+    # 驗證密碼
+    if provided_password != expected_password:
+        return jsonify({"error": "未授權的訪問"}), 401
+
+    try:
+        # 密碼驗證成功後，重新建立新的預測器實例
+        predictor = ARAMPredictor(bucket_name)
+        return jsonify({"message": "模型已成功重新加載"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':

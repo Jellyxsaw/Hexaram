@@ -1,3 +1,4 @@
-import tensorflow as tf
+
 import  numpy as np
-print(np.__version__)
+from google.cloud import storage
+print(storage.__version__)
