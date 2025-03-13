@@ -1,6 +1,7 @@
 import base64
-import itertools
 import json
+import os
+import sys
 import time
 import tkinter as tk
 from functools import lru_cache
@@ -9,19 +10,13 @@ from tkinter import ttk, messagebox, filedialog
 
 import requests
 import urllib3
+import yaml  # 使用 PyYAML 處理 YAML 格式
 from PIL import Image, ImageTk
 
-# ------------------ 配置部分 ------------------
-from pureARAMPredictor import ARAMPredictor
-
-LOCKFILE_PATH = r"C:\Riot Games\League of Legends\lockfile"
-CHAMPION_MAPPING_FILE = 'champion_mapping.json'
-LOCAL_TEST_DATA = 'local_session.json'
-import sys
-import os
-import configparser
+from apiWorker import recommend_compositions_api
 
 
+# ------------------ 共用工具函數 ------------------
 def get_resource_path(relative_path):
     # 如果被打包，sys._MEIPASS 會指向臨時目錄
     if getattr(sys, 'frozen', False):
@@ -31,12 +26,16 @@ def get_resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-config_path = get_resource_path("config.ini")
+# 載入 YAML 設定檔
+config_path = get_resource_path("config.yml")
+try:
+    with open(config_path, "r", encoding="utf-8") as f:
+        YAML_CONFIG = yaml.safe_load(f)
+except Exception as e:
+    raise FileNotFoundError(f"無法讀取設定檔：{config_path}, 錯誤：{e}")
 
-config = configparser.ConfigParser()
-read_files = config.read(config_path, encoding='utf-8')
-if not read_files:
-    raise FileNotFoundError(f"無法讀取設定檔：{config_path}")
+LOCKFILE_PATH = YAML_CONFIG.get("lockfile_path", "")
+DEFAULT_LANGUAGE = YAML_CONFIG.get("language", "zh")
 
 
 # ------------------ 工具函數 ------------------
@@ -60,20 +59,6 @@ def get_champion_mappings():
 
 def id_to_name(champion_id, id_mapping):
     return id_mapping.get(str(champion_id), "未知英雄")
-
-
-# ------------------ 推薦陣容計算 ------------------
-def recommend_compositions(candidate_pool, predictor):
-    valid_pool = [h for h in candidate_pool if h != "未知英雄"]
-    if len(valid_pool) < 5:
-        return []
-
-    candidate_compositions = list(itertools.combinations(candidate_pool, 5))
-    comps_list = [list(comp) for comp in candidate_compositions]
-    batch_results = predictor.batch_predict(comps_list)
-    scored_compositions = list(zip(candidate_compositions, batch_results))
-    sorted_scored = sorted(scored_compositions, key=lambda x: x[1])
-    return sorted_scored
 
 
 # ------------------ 核心邏輯類 ------------------
@@ -140,6 +125,7 @@ class DataFetcher:
         }
 
     def load_local_data(self):
+        LOCAL_TEST_DATA = 'local_session.json'
         try:
             with open(LOCAL_TEST_DATA, 'r', encoding='utf-8') as f:
                 return self.parse_session_data(json.load(f))
@@ -171,9 +157,9 @@ class ModernARAMApp:
         self.root.title("ARAM 勝率助手 - 深色版")
         self.root.configure(bg=STYLE_CONFIG["bg"])
 
-        # 新增設定：lockfile 路徑與語言設定（預設中文）
+        # 新增設定：lockfile 路徑與語言設定（預設從 YAML 載入）
         self.lockfile_path = LOCKFILE_PATH
-        self.language = "zh"  # "zh" 表示中文，"en" 表示英文
+        self.language = DEFAULT_LANGUAGE  # "zh" 表示中文，"en" 表示英文
 
         # 初始化圖片緩存
         self.champ_images = {}
@@ -182,7 +168,6 @@ class ModernARAMApp:
         self.setup_ui()
         self.apply_styles()
         self.fetcher = DataFetcher(self.lockfile_path)
-        self.predictor = ARAMPredictor()
 
     def load_champion_images(self):
         img_dir = "champion_images"
@@ -405,7 +390,7 @@ class ModernARAMApp:
 
     def calculate_recommendations(self, candidate_pool):
         start_time = time.time()
-        sorted_compositions = recommend_compositions(candidate_pool, self.predictor)
+        sorted_compositions = recommend_compositions_api(candidate_pool)
         elapsed = time.time() - start_time
 
         self.result_tree.delete(*self.result_tree.get_children())
@@ -428,21 +413,28 @@ class ModernARAMApp:
         print(f"計算完成，耗時: {elapsed:.2f}秒")
 
     def open_settings(self):
+        # 建立設定視窗並調整背景顏色讓文字易讀
         settings_win = tk.Toplevel(self.root)
         settings_win.title("設定")
         settings_win.grab_set()
+        settings_win.configure(bg="#f0f0f0")  # 使用淺色背景
+
+        # 針對設定視窗建立專屬樣式
+        s = ttk.Style()
+        s.configure("Settings.TLabel", background="#f0f0f0", foreground="black", font=STYLE_CONFIG["font"])
+        s.configure("Settings.TEntry", fieldbackground="white", foreground="black", font=STYLE_CONFIG["font"])
 
         # Lockfile 路徑設定
-        lockfile_label = ttk.Label(settings_win, text="Lockfile 位置:")
+        lockfile_label = ttk.Label(settings_win, text="Lockfile 位置:", style="Settings.TLabel")
         lockfile_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        lockfile_entry = ttk.Entry(settings_win, width=50)
+        lockfile_entry = ttk.Entry(settings_win, width=50, style="Settings.TEntry")
         lockfile_entry.grid(row=0, column=1, padx=5, pady=5)
         lockfile_entry.insert(0, self.lockfile_path)
         browse_btn = ttk.Button(settings_win, text="瀏覽", command=lambda: self.browse_lockfile(lockfile_entry))
         browse_btn.grid(row=0, column=2, padx=5, pady=5)
 
         # 語言設定
-        lang_label = ttk.Label(settings_win, text="語言:")
+        lang_label = ttk.Label(settings_win, text="語言:", style="Settings.TLabel")
         lang_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
         lang_var = tk.StringVar(value=self.language)
         rb_zh = ttk.Radiobutton(settings_win, text="中文", variable=lang_var, value="zh")
@@ -459,7 +451,7 @@ class ModernARAMApp:
 
     def browse_lockfile(self, entry):
         file_path = filedialog.askopenfilename(title="選擇 Lockfile",
-                                               filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+                                               filetypes=[("All Files", "*.*")])
         if file_path:
             entry.delete(0, tk.END)
             entry.insert(0, file_path)
@@ -471,6 +463,15 @@ class ModernARAMApp:
         self.fetcher = DataFetcher(self.lockfile_path)
         messagebox.showinfo("提示", "設定已保存")
         win.destroy()
+
+        # 將新的設定同步寫入 YAML 檔案
+        YAML_CONFIG["lockfile_path"] = self.lockfile_path
+        YAML_CONFIG["language"] = self.language
+        try:
+            with open(config_path, "w", encoding="utf-8") as f:
+                yaml.safe_dump(YAML_CONFIG, f, allow_unicode=True)
+        except Exception as e:
+            print(f"寫入設定檔失敗: {e}")
 
 
 if __name__ == "__main__":

@@ -2,12 +2,14 @@ import itertools
 
 from flasgger import Swagger
 from flask import Flask, jsonify, request
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from apilogger import register_api_logger
 from extensions import db, db_uri
 from pureARAMPredictor import ARAMPredictor
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 swagger = Swagger(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
