@@ -16,6 +16,16 @@ bucket_name = config['gcs']['BUCKET_NAME']
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+
+app.config['SWAGGER'] = {
+    'uiversion': 3,
+    'info': {
+        'title': 'pinkyJelly 的 hexaram API',
+        'version': '1.0.0',
+        'description': '主要開發文檔放在 https://github.com/Jellyxsaw/Hexaram/'
+    }
+}
+
 swagger = Swagger(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

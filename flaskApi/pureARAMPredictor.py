@@ -62,13 +62,15 @@ class ChampionNormalizer:
 
 
 # -------------------- 資源路徑輔助函式 --------------------
-def resource_path(relative_path):
-    """取得資源檔案的絕對路徑，適用於開發及 PyInstaller環境"""
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
+def resource_path(filename):
+    """
+    根據作業系統回傳檔案在暫存目錄中的完整路徑
+    """
+    if sys.platform == "Windows":
+        temp_dir = os.path.join("C:\\", "Temp")
+    else:
+        temp_dir = "/tmp"
+    return os.path.join(temp_dir, filename)
 
 
 # -------------------- ARAM 勝率預測器類別 --------------------
@@ -81,26 +83,26 @@ class ARAMPredictor:
         """
         self.bucket_name = bucket_name
 
-        # 定義本機檔案名稱與 GCS 上的對應檔案路徑（可依需求修改）
+        # 定義本機檔案名稱與 GCS 上的對應檔案路徑
         self.model_file = "advanced_aram_model_v2.h5"
         self.mapping_file = "champion_to_idx_v2.pkl"
         self.scaler_file = "scaler_v2.pkl"
         self.champion_stats_file = "champion_stats_dict_v2.pkl"
 
-        # 下載資源
+        # 下載資源（下載時已根據作業系統動態選擇暫存目錄）
         download_blob(bucket_name, self.model_file, os.path.join(gcs_prefix, self.model_file))
         download_blob(bucket_name, self.mapping_file, os.path.join(gcs_prefix, self.mapping_file))
         download_blob(bucket_name, self.scaler_file, os.path.join(gcs_prefix, self.scaler_file))
         download_blob(bucket_name, self.champion_stats_file,
                       os.path.join(gcs_prefix, self.champion_stats_file))
 
-        # 取得正確的本機路徑
+        # 取得正確的本機路徑（從暫存目錄中讀取）
         model_full_path = resource_path(self.model_file)
         mapping_full_path = resource_path(self.mapping_file)
         scaler_full_path = resource_path(self.scaler_file)
         champion_stats_full_path = resource_path(self.champion_stats_file)
 
-        # 檢查檔案是否存在（理論上經過 download_resource_if_needed 應該都存在）
+        # 檢查檔案是否存在
         for path in [model_full_path, mapping_full_path, scaler_full_path, champion_stats_full_path]:
             if not os.path.exists(path):
                 raise FileNotFoundError(f"檔案 {path} 不存在，請確認 GCS 上有對應檔案並檢查下載權限。")
@@ -113,6 +115,7 @@ class ARAMPredictor:
             self.scaler = pickle.load(f)
         with open(champion_stats_full_path, "rb") as f:
             self.champion_stats_dict = pickle.load(f)
+
         # 建立名稱正規化器
         self.normalizer = ChampionNormalizer()
         # 建立正規化後名稱對應到英雄索引的字典

@@ -1,3 +1,6 @@
+import os
+from sys import platform
+
 from google.cloud import storage
 
 
@@ -44,9 +47,20 @@ def download_blob(bucket_name, source_blob_name, destination_file_name):
     if not blob.exists():
         raise FileNotFoundError(f"GCS 中不存在檔案: {bucket_name}/{source_blob_name}")
 
-    # 下載 blob 到本地指定的路徑
-    blob.download_to_filename(destination_file_name)
-    print(f"檔案 {bucket_name}/{source_blob_name} 已下載到 {destination_file_name}")
+    # 根據作業系統設定下載路徑
+    if platform == "Windows":
+        temp_dir = os.path.join("C:\\", "Temp")
+    else:
+        temp_dir = "/tmp"
+
+    # 確保目標資料夾存在
+    os.makedirs(temp_dir, exist_ok=True)
+
+    # 設定最終下載檔案的完整路徑
+    destination_file_path = os.path.join(temp_dir, os.path.basename(source_blob_name))
+
+    blob.download_to_filename(destination_file_path)
+    print(f"檔案 {bucket_name}/{source_blob_name} 已下載到 {destination_file_path}")
 
 
 if __name__ == '__main__':
