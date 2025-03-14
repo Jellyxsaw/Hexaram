@@ -291,54 +291,67 @@ def insert_match(conn, raw_match):
 # =========== 主流程 ===========
 def main():
     conn = get_db_connection()
-    target_matches = 200000
+    target_matches = 1_000_000
+    consecutive_errors = 0  # 連續錯誤計數器
 
     while count_matches(conn) < target_matches:
-        current_count = count_matches(conn)
-        print("目前 matches 數量:", current_count)
+        try:
+            current_count = count_matches(conn)
+            print("目前 matches 數量:", current_count)
 
-        # 1. 取得 summoners 表中 is_searched = FALSE 的第一筆 summoner
-        summoner_puuid = get_first_unsearched_summoner(conn)
-        if not summoner_puuid:
-            # 若找不到，則使用初始種子召喚師並插入 summoners 表（若尚未存在）
-            account_data = get_account_data(GAME_NAME, TAG_LINE)
-            if account_data is None:
-                print("初始召喚師資料取得失敗，結束")
+            # 1. 取得 summoners 表中 is_searched = FALSE 的第一筆 summoner
+            summoner_puuid = get_first_unsearched_summoner(conn)
+            if not summoner_puuid:
+                # 若找不到，則使用初始種子召喚師並插入 summoners 表（若尚未存在）
+                account_data = get_account_data(GAME_NAME, TAG_LINE)
+                if account_data is None:
+                    print("初始召喚師資料取得失敗，結束")
+                    break
+                summoner_puuid = account_data.get("puuid")
+                insert_summoner_if_not_exists(conn, summoner_puuid, GAME_NAME, GAME_NAME, TAG_LINE)
+            print("處理召喚師 puuid:", summoner_puuid)
+
+            # 2. 將該召喚師設為已搜尋過
+            mark_summoner_as_searched(conn, summoner_puuid)
+
+            # 3. 依據此 summoner_puuid 取得前100筆兩個月內的 ARAM 對局 id
+            match_ids = get_match_ids(summoner_puuid, count=100)
+            if match_ids is None:
+                print("無法取得對局 id，跳過此召喚師")
+                continue
+
+            # 4. 依序處理每一筆對局
+            for match_id in match_ids:
+                if match_exists(conn, match_id):
+                    print("對局已存在:", match_id)
+                    continue
+                print("取得對局資料:", match_id)
+                raw_match = get_match_details(match_id)
+                if raw_match is None:
+                    continue
+
+                # 插入原始資料與精細資料到 model_matches 表中
+                insert_match(conn, raw_match)
+
+                # 將對局中所有參與者 puuid 寫入 summoners 表（若不存在）
+                for p_puuid in raw_match.get("metadata", {}).get("participants", []):
+                    insert_summoner_if_not_exists(conn, p_puuid)
+                # 暫停 1 秒以避免 API 請求過快
+                time.sleep(1)
+
+            # 每輪處理後暫停 2 秒
+            time.sleep(2)
+            # 本輪成功執行後，重置連續錯誤計數器
+            consecutive_errors = 0
+
+        except Exception as e:
+            print("發生異常：", e)
+            consecutive_errors += 1
+            if consecutive_errors >= 5:
+                print("連續異常達5次，程式停止。")
                 break
-            summoner_puuid = account_data.get("puuid")
-            insert_summoner_if_not_exists(conn, summoner_puuid, GAME_NAME, GAME_NAME, TAG_LINE)
-        print("處理召喚師 puuid:", summoner_puuid)
-
-        # 2. 將該召喚師設為已搜尋過
-        mark_summoner_as_searched(conn, summoner_puuid)
-
-        # 3. 依據此 summoner_puuid 取得前100筆兩個月內的 ARAM 對局 id
-        match_ids = get_match_ids(summoner_puuid, count=100)
-        if match_ids is None:
-            print("無法取得對局 id，跳過此召喚師")
-            continue
-
-        # 4. 依序處理每一筆對局
-        for match_id in match_ids:
-            if match_exists(conn, match_id):
-                print("對局已存在:", match_id)
-                continue
-            print("取得對局資料:", match_id)
-            raw_match = get_match_details(match_id)
-            if raw_match is None:
-                continue
-
-            # 插入原始資料與精細資料到 model_matches 表中
-            insert_match(conn, raw_match)
-
-            # 將對局中所有參與者 puuid 寫入 summoners 表（若不存在）
-            for p_puuid in raw_match.get("metadata", {}).get("participants", []):
-                insert_summoner_if_not_exists(conn, p_puuid)
-            # 暫停 1 秒以避免 API 請求過快
-            time.sleep(1)
-
-        # 每輪處理後暫停 2 秒
-        time.sleep(2)
+            print("等待1分鐘後再繼續...")
+            time.sleep(60)
 
     print("達到目標對局數量:", count_matches(conn))
     conn.close()

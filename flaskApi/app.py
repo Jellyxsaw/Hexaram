@@ -22,7 +22,7 @@ app.config['SWAGGER'] = {
     'info': {
         'title': 'pinkyJelly 的 hexaram API',
         'version': '1.0.0',
-        'description': '主要開發文檔放在 https://github.com/Jellyxsaw/Hexaram/'
+        'description': '主要開發文檔放在 https://github.com/Jellyxsaw/Hexaram/ 第一次請求會等約20秒(GAE的冷啟動) 因為成本考量沒辦法長時間創建實例請見諒'
     }
 }
 
@@ -167,6 +167,15 @@ def reload_model():
         return jsonify({"message": "模型已成功重新加載"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/_ah/warmup')
+def warmup():
+    # 在此處可執行預先初始化的工作，例如重新加載模型、建立連線等
+    global predictor
+    predictor = ARAMPredictor(bucket_name)
+    # 如果有其他需要初始化的資源，也可以在這裡處理
+    return 'Warmup completed', 200
 
 
 if __name__ == '__main__':
