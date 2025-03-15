@@ -1,0 +1,252 @@
+{
+  "actions": [],
+  "allowBattleBoost": true,
+  "allowDuplicatePicks": false,
+  "allowLockedEvents": false,
+  "allowRerolling": true,
+  "allowSkinSelection": true,
+  "bans": {
+    "myTeamBans": [],
+    "numBans": 0,
+    "theirTeamBans": []
+  },
+  "benchChampions": [
+    {
+      "championId": 6,
+      "isPriority": false
+    },
+    {
+      "championId": 235,
+      "isPriority": false
+    },
+    {
+      "championId": 34,
+      "isPriority": false
+    },
+    {
+      "championId": 432,
+      "isPriority": false
+    },
+    {
+      "championId": 143,
+      "isPriority": false
+    }
+  ],
+  "benchEnabled": true,
+  "boostableSkinCount": 1,
+  "chatDetails": {
+    "mucJwtDto": {
+      "channelClaim": "14101b23-c8d8-446b-9d7e-960ffa44ef29",
+      "domain": "lol-champ-select",
+      "jwt": "eyJraWQiOiIxIiwiYWxnIjoiUlMyNTYifQ.eyJ0Z3QiOiJzYTIiLCJzdWIiOiJhZjU4MmQzYS0yYmU1LTUzNDUtYTUzYi0wOWFlOGUwY2EzNGQiLCJtZXRhZGF0YSI6eyJnYW1lSWQiOiIyODg4NjE4OTIiLCJyZWdpb24iOiJUVzIiLCJsb2JieVR5cGUiOiJwcmUtZ2FtZSIsInByb2R1Y3QiOiJsb2wifSwiaXNzIjoibG9sLXRlYW1idWlsZGVyIiwiY2huIjoiMTQxMDFiMjMtYzhkOC00NDZiLTlkN2UtOTYwZmZhNDRlZjI5IiwidHlwIjoibG9sLWNoYW1wLXNlbGVjdCIsImV4cCI6MTc0MTY2NzI0MCwiaWF0IjoxNzQxNjY2NjQwLCJqdGkiOiI3NzU0ODQwMy03MTUxLTRlYjQtOTg0Yy1kNTg5ZWY3ZDBkZDgiLCJjcm0iOiIxNDEwMWIyMy1jOGQ4LTQ0NmItOWQ3ZS05NjBmZmE0NGVmMjlAbG9sLWNoYW1wLXNlbGVjdC5wdnAubmV0In0.iSQRdvZw2lHi2bw5izaAFe2WSHpELPbPdBA9-GlpsEvRc6Sj9Bmvu1J3csvUXr_GOLJoUjcInAzemKyDTJ4HphkeiTxR6v6kSU5zTUR-rlncHDqQoxcEThBRAHFPdSGzg0xb9X0cKCF4BQeehR5_3KKDGbLhQyvIIuWyGhvGezdkgNPdNiwhc7f2LnqcE6fA3pksbbThMxdhajFNVsLqBiIqrqiyHfUKtk3hTb_-upSAfmROI2Hg31zdi8_cJy1X4w9RnWMBKNtf3RjcyKQNxC_0zNc0-VOmxOAz4guvQVIDp-LbVbhv4RfyxUOlhWnUuyxBUJpF4URxPAKHoOu_1w",
+      "targetRegion": "sa2"
+    },
+    "multiUserChatId": "14101b23-c8d8-446b-9d7e-960ffa44ef29",
+    "multiUserChatPassword": "eyJraWQiOiIxIiwiYWxnIjoiUlMyNTYifQ.eyJ0Z3QiOiJzYTIiLCJzdWIiOiJhZjU4MmQzYS0yYmU1LTUzNDUtYTUzYi0wOWFlOGUwY2EzNGQiLCJtZXRhZGF0YSI6eyJnYW1lSWQiOiIyODg4NjE4OTIiLCJyZWdpb24iOiJUVzIiLCJsb2JieVR5cGUiOiJwcmUtZ2FtZSIsInByb2R1Y3QiOiJsb2wifSwiaXNzIjoibG9sLXRlYW1idWlsZGVyIiwiY2huIjoiMTQxMDFiMjMtYzhkOC00NDZiLTlkN2UtOTYwZmZhNDRlZjI5IiwidHlwIjoibG9sLWNoYW1wLXNlbGVjdCIsImV4cCI6MTc0MTY2NzI0MCwiaWF0IjoxNzQxNjY2NjQwLCJqdGkiOiI3NzU0ODQwMy03MTUxLTRlYjQtOTg0Yy1kNTg5ZWY3ZDBkZDgiLCJjcm0iOiIxNDEwMWIyMy1jOGQ4LTQ0NmItOWQ3ZS05NjBmZmE0NGVmMjlAbG9sLWNoYW1wLXNlbGVjdC5wdnAubmV0In0.iSQRdvZw2lHi2bw5izaAFe2WSHpELPbPdBA9-GlpsEvRc6Sj9Bmvu1J3csvUXr_GOLJoUjcInAzemKyDTJ4HphkeiTxR6v6kSU5zTUR-rlncHDqQoxcEThBRAHFPdSGzg0xb9X0cKCF4BQeehR5_3KKDGbLhQyvIIuWyGhvGezdkgNPdNiwhc7f2LnqcE6fA3pksbbThMxdhajFNVsLqBiIqrqiyHfUKtk3hTb_-upSAfmROI2Hg31zdi8_cJy1X4w9RnWMBKNtf3RjcyKQNxC_0zNc0-VOmxOAz4guvQVIDp-LbVbhv4RfyxUOlhWnUuyxBUJpF4URxPAKHoOu_1w"
+  },
+  "counter": 11,
+  "gameId": 288861892,
+  "hasSimultaneousBans": true,
+  "hasSimultaneousPicks": true,
+  "isCustomGame": false,
+  "isSpectating": false,
+  "localPlayerCellId": 7,
+  "lockedEventIndex": -1,
+  "myTeam": [
+    {
+      "assignedPosition": "",
+      "cellId": 5,
+      "championId": 76,
+      "championPickIntent": 0,
+      "nameVisibilityType": "VISIBLE",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "74659d06-3f45-5735-810c-5f02d29094f3",
+      "selectedSkinId": 76027,
+      "spell1Id": 32,
+      "spell2Id": 4,
+      "summonerId": 3112523248370976,
+      "team": 2,
+      "wardSkinId": -1
+    },
+    {
+      "assignedPosition": "",
+      "cellId": 6,
+      "championId": 121,
+      "championPickIntent": 0,
+      "nameVisibilityType": "VISIBLE",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "4caa3324-9fc6-51aa-9b49-4a68707b0c71",
+      "selectedSkinId": 121001,
+      "spell1Id": 4,
+      "spell2Id": 32,
+      "summonerId": 3112426384794912,
+      "team": 2,
+      "wardSkinId": -1
+    },
+    {
+      "assignedPosition": "",
+      "cellId": 7,
+      "championId": 8,
+      "championPickIntent": 0,
+      "nameVisibilityType": "VISIBLE",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "af582d3a-2be5-5345-a53b-09ae8e0ca34d",
+      "selectedSkinId": 8008,
+      "spell1Id": 6,
+      "spell2Id": 32,
+      "summonerId": 3112541683893984,
+      "team": 2,
+      "wardSkinId": 1
+    },
+    {
+      "assignedPosition": "",
+      "cellId": 8,
+      "championId": 166,
+      "championPickIntent": 0,
+      "nameVisibilityType": "VISIBLE",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "13f10062-1784-548c-b14e-7fc532f59ac9",
+      "selectedSkinId": 166020,
+      "spell1Id": 32,
+      "spell2Id": 4,
+      "summonerId": 3112338149590080,
+      "team": 2,
+      "wardSkinId": -1
+    },
+    {
+      "assignedPosition": "",
+      "cellId": 9,
+      "championId": 131,
+      "championPickIntent": 0,
+      "nameVisibilityType": "VISIBLE",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "6c7974dd-0ce4-5e47-90be-77173b43d626",
+      "selectedSkinId": 131025,
+      "spell1Id": 4,
+      "spell2Id": 32,
+      "summonerId": 3113576365442464,
+      "team": 2,
+      "wardSkinId": -1
+    }
+  ],
+  "pickOrderSwaps": [],
+  "recoveryCounter": 0,
+  "rerollsRemaining": 0,
+  "skipChampionSelect": false,
+  "theirTeam": [
+    {
+      "assignedPosition": "",
+      "cellId": 0,
+      "championId": 0,
+      "championPickIntent": 0,
+      "nameVisibilityType": "HIDDEN",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "",
+      "selectedSkinId": 0,
+      "spell1Id": 0,
+      "spell2Id": 0,
+      "summonerId": 0,
+      "team": 1,
+      "wardSkinId": -1
+    },
+    {
+      "assignedPosition": "",
+      "cellId": 1,
+      "championId": 0,
+      "championPickIntent": 0,
+      "nameVisibilityType": "HIDDEN",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "",
+      "selectedSkinId": 0,
+      "spell1Id": 0,
+      "spell2Id": 0,
+      "summonerId": 0,
+      "team": 1,
+      "wardSkinId": -1
+    },
+    {
+      "assignedPosition": "",
+      "cellId": 2,
+      "championId": 0,
+      "championPickIntent": 0,
+      "nameVisibilityType": "HIDDEN",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "",
+      "selectedSkinId": 0,
+      "spell1Id": 0,
+      "spell2Id": 0,
+      "summonerId": 0,
+      "team": 1,
+      "wardSkinId": -1
+    },
+    {
+      "assignedPosition": "",
+      "cellId": 3,
+      "championId": 0,
+      "championPickIntent": 0,
+      "nameVisibilityType": "HIDDEN",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "",
+      "selectedSkinId": 0,
+      "spell1Id": 0,
+      "spell2Id": 0,
+      "summonerId": 0,
+      "team": 1,
+      "wardSkinId": -1
+    },
+    {
+      "assignedPosition": "",
+      "cellId": 4,
+      "championId": 0,
+      "championPickIntent": 0,
+      "nameVisibilityType": "HIDDEN",
+      "obfuscatedPuuid": "",
+      "obfuscatedSummonerId": 0,
+      "puuid": "",
+      "selectedSkinId": 0,
+      "spell1Id": 0,
+      "spell2Id": 0,
+      "summonerId": 0,
+      "team": 1,
+      "wardSkinId": -1
+    }
+  ],
+  "timer": {
+    "adjustedTimeLeftInPhase": 51749,
+    "internalNowInEpochMs": 1741666661440,
+    "isInfinite": false,
+    "phase": "FINALIZATION",
+    "totalTimeInPhase": 70000
+  },
+  "trades": [
+    {
+      "cellId": 9,
+      "id": 74,
+      "state": "AVAILABLE"
+    },
+    {
+      "cellId": 5,
+      "id": 76,
+      "state": "AVAILABLE"
+    },
+    {
+      "cellId": 8,
+      "id": 78,
+      "state": "AVAILABLE"
+    },
+    {
+      "cellId": 6,
+      "id": 80,
+      "state": "AVAILABLE"
+    }
+  ]
+}

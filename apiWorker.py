@@ -17,7 +17,7 @@ def recommend_compositions_api(candidate_pool):
     # 將 candidate_pool 作為 heroes 傳送給 API
     payload = {"heroes": candidate_pool}
     try:
-        response = requests.post(PREDICT_API_URL, json=payload, timeout=10)
+        response = requests.post(PREDICT_API_URL, json=payload, timeout=25)
     except Exception as e:
         raise Exception(f"API 請求失敗：{e}")
 
