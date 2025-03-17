@@ -1,5 +1,5 @@
-# Hexaram - ARAM 勝率助手 & 陣容強度預測系統
-![Uploading image.png…]()
+![image](https://github.com/user-attachments/assets/053a7bbe-49ff-4684-9d34-545c362b6946)# Hexaram - ARAM 勝率助手 & 陣容強度預測系統
+
 
 > 此專案主要包含兩大部分：  
 > 1. **GUI 勝率助手** – 透過 tkinter 提供即時/本地遊戲資料讀取、英雄資料展示及推薦陣容計算。  
