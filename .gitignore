@@ -5,3 +5,4 @@ build
 appTest.rar
 __pycache__
 *.rar
+sql/copyData.py
