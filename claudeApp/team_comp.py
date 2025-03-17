@@ -37,6 +37,43 @@ class TeamCompFrame(tk.Frame):
         # 載入資料
         self.load_team_comp_data()
 
+    def create_current_comp_winrate_section(self):
+        """創建當前陣容勝率區塊"""
+        # 標題
+        title_label = tk.Label(
+            self.left_panel.interior,
+            text="當前陣容勝率",
+            bg="#16213e",
+            fg="white",
+            font=(self.font_family_bold, 12),
+            anchor="w"
+        )
+        title_label.pack(anchor="w", padx=20, pady=(15, 0))
+
+        # 分隔線
+        separator = tk.Frame(self.left_panel.interior, bg="#e94560", height=1)
+        separator.pack(fill="x", padx=20, pady=5)
+
+        # 勝率顯示框架
+        self.current_winrate_frame = RoundedFrame(
+            self.left_panel.interior,
+            bg_color="#0f3460",
+            corner_radius=self.corner_radius,
+            height=60
+        )
+        self.current_winrate_frame.pack(fill="x", padx=20, pady=10)
+
+        # 勝率標籤
+        self.current_winrate_label = tk.Label(
+            self.current_winrate_frame.interior,
+            text="計算中...",
+            bg="#0f3460",
+            fg="#4ecca3",
+            font=(self.font_family_bold, 16),
+            height=2
+        )
+        self.current_winrate_label.pack(fill="both", expand=True)
+
     def setup_fonts(self):
         """設置字體"""
         # 從控制器獲取字體家族 (如果有的話)
@@ -89,6 +126,8 @@ class TeamCompFrame(tk.Frame):
 
         # 已選英雄部分
         self.create_selected_champions_section()
+
+        self.create_current_comp_winrate_section()
 
         # 可用英雄池部分
         self.create_available_champions_section()
@@ -264,7 +303,7 @@ class TeamCompFrame(tk.Frame):
 
         # 選項卡按鈕
         self.tab_buttons = {}
-        tab_options = ["推薦陣容", "屬性分析", "勝率預測"]
+        tab_options = ["推薦陣容", "最不推薦陣容", "其他功能"]
 
         for i, option in enumerate(tab_options):
             button = RoundedButton(
@@ -614,11 +653,63 @@ class TeamCompFrame(tk.Frame):
                 if data:
                     # 更新可用英雄池
                     self.update_available_champions(data)
+
+                    # 計算當前五位英雄的勝率
+                    self.calculate_current_comp_winrate(data.get('selected', []))
             else:
                 print("沒有可用的數據獲取器")
 
         except Exception as e:
             print(f"載入陣容數據時出錯: {e}")
+
+    def calculate_current_comp_winrate(self, selected_champions):
+        """計算當前五位英雄的勝率"""
+        # 如果沒有五位英雄，顯示提示訊息
+        if not selected_champions or len(selected_champions) != 5:
+            self.current_winrate_label.config(text="等待選出五位英雄")
+            return
+
+        # 為了確保每个英雄名稱為英文，進行轉換
+        english_champions = []
+        for champion in selected_champions:
+            # 檢查是否是中文名稱，如果是則轉為英文
+            if self.fetcher and hasattr(self.fetcher, 'tw_mapping'):
+                # 從 tw_mapping 中尋找對應的英文名稱
+                reverse_mapping = {v: k for k, v in self.fetcher.tw_mapping.items()}
+                if champion in reverse_mapping:
+                    english_champions.append(reverse_mapping[champion])
+                    continue
+            # 如果不是中文或找不到對應的英文，則使用原名
+            english_champions.append(champion)
+
+        # 開始計算當前五位英雄的勝率 (在背景執行)
+        threading.Thread(target=self._calculate_current_comp_winrate_thread,
+                         args=(english_champions,), daemon=True).start()
+
+    def _calculate_current_comp_winrate_thread(self, champions):
+        """在背景執行勝率計算"""
+        try:
+            # 使用 recommend_compositions_api 獲取勝率
+            # 由於我們只傳遞這五位英雄，API 應該只返回一個組合
+            self.root.after(0, lambda: self.current_winrate_label.config(
+                text="計算中...", fg="#e94560"))
+
+            # 調用 API
+            sorted_compositions = recommend_compositions_api(champions)
+
+            # 處理結果
+            if sorted_compositions and len(sorted_compositions) > 0:
+                # 第一個組合就是我們需要的
+                comp, winrate = sorted_compositions[0]
+                self.root.after(0, lambda: self.current_winrate_label.config(
+                    text=f"{winrate:.2%}", fg="#4ecca3"))
+            else:
+                self.root.after(0, lambda: self.current_winrate_label.config(
+                    text="無法計算勝率", fg="#e94560"))
+        except Exception as e:
+            print(f"計算當前陣容勝率時出錯: {e}")
+            self.root.after(0, lambda: self.current_winrate_label.config(
+                text="計算失敗", fg="#e94560"))
 
     def update_available_champions(self, data):
         """更新可用英雄池"""
@@ -733,7 +824,7 @@ class TeamCompFrame(tk.Frame):
                 "label": name_label,
                 "champion_name": champion_name
             })
-# 更新已選英雄
+        # 更新已選英雄
         for i, champion_name in enumerate(selected_champions):
             if i < 5:  # 最多 5 個英雄
                 self.selected_champion_slots[i]["selected"] = True

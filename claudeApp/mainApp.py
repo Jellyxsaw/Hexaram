@@ -5,7 +5,7 @@ from tkinter import ttk, font
 import dataFetcher
 # 導入各界面模組
 from champion_list import ChampionListFrame
-from claudeApp.util import load_champion_images
+from util import load_champion_images
 # 導入圓角小部件
 from rounded_widgets import RoundedFrame, RoundedButton
 from settings import SettingsFrame
@@ -404,7 +404,7 @@ class ARAMAnalyzerApp:
         # 創建導航按鈕 - 使用圓角按鈕
         nav_options = [
             ("team_comp", "陣容推薦", self.show_team_comp),
-            ("stats", "數據分析", self.show_stats_analysis),
+            ("champ_list", "數據分析", self.show_champion_list),
             ("teammates", "隊友戰績", self.show_teammate_stats),
             ("settings", "設定", self.show_settings),
         ]
@@ -695,7 +695,7 @@ class ARAMAnalyzerApp:
 
     def show_stats_analysis(self, refresh=False):
         """顯示數據分析頁面"""
-        self.update_nav_buttons("stats")
+        self.update_nav_buttons("champ_list")
         self.clear_content()
 
         # 建立圓角容器
