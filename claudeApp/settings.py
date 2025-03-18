@@ -1,5 +1,8 @@
+import json
+import os
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import filedialog, messagebox
+
 from rounded_widgets import RoundedFrame, RoundedButton
 
 
@@ -7,17 +10,40 @@ class SettingsFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="#1a1a2e")
         self.controller = controller
+        self.config_file = "config.json"
 
         # 設定初始值
-        self.lockfile_path = tk.StringVar(value="C:\\Riot Games\\League of Legends\\lockfile")
-        self.language = tk.StringVar(value="中文")
-        self.theme = tk.StringVar(value="暗色主題")
-        self.auto_detect = tk.BooleanVar(value=True)
-        self.refresh_rate = tk.StringVar(value="高 (5秒)")
-        self.enable_cache = tk.BooleanVar(value=True)
+        self.load_settings()
 
         # 創建設定頁面
         self.create_settings_page()
+
+    def load_settings(self):
+        """從配置文件加載設定"""
+        try:
+            if os.path.exists(self.config_file):
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                    self.lockfile_path = tk.StringVar(value=config.get('lockfile_path', "C:\\Riot Games\\League of Legends\\lockfile"))
+                    self.language = tk.StringVar(value=config.get('language', "中文"))
+                    self.theme = tk.StringVar(value=config.get('theme', "暗色主題"))
+                    self.auto_detect = tk.BooleanVar(value=config.get('auto_detect', True))
+                    self.enable_cache = tk.BooleanVar(value=config.get('enable_cache', True))
+            else:
+                # 使用默認值
+                self.lockfile_path = tk.StringVar(value="C:\\Riot Games\\League of Legends\\lockfile")
+                self.language = tk.StringVar(value="中文")
+                self.theme = tk.StringVar(value="暗色主題")
+                self.auto_detect = tk.BooleanVar(value=True)
+                self.enable_cache = tk.BooleanVar(value=True)
+        except Exception as e:
+            print(f"加載設定時發生錯誤: {str(e)}")
+            # 使用默認值
+            self.lockfile_path = tk.StringVar(value="C:\\Riot Games\\League of Legends\\lockfile")
+            self.language = tk.StringVar(value="中文")
+            self.theme = tk.StringVar(value="暗色主題")
+            self.auto_detect = tk.BooleanVar(value=True)
+            self.enable_cache = tk.BooleanVar(value=True)
 
     def create_settings_page(self):
         """創建設定頁面"""
@@ -33,37 +59,37 @@ class SettingsFrame(tk.Frame):
             border_color="#e94560",
             border_width=1
         )
-        form_container.pack(padx=250, pady=100)
+        form_container.pack(fill="both", expand=True, padx=250, pady=50)
         
-        # 配置内部框架
-        form_container.interior.configure(width=700, height=600)
-        form_container.interior.pack_propagate(False)
+        # 內容容器
+        content_container = tk.Frame(form_container.interior, bg="#1e293b")
+        content_container.pack(fill="both", expand=True, padx=20, pady=20)
 
         # 標題
         title_label = tk.Label(
-            form_container.interior,
+            content_container,
             text="設定",
             bg="#1e293b",
             fg="white",
             font=("Noto Sans TC", 24, "bold")
         )
-        title_label.pack(anchor="w", padx=50, pady=(40, 0))
+        title_label.pack(anchor="w", padx=50, pady=(20, 0))
 
         # 分隔線
-        separator = tk.Frame(form_container.interior, bg="#e94560", height=2)
+        separator = tk.Frame(content_container, bg="#e94560", height=2)
         separator.pack(fill="x", padx=50, pady=15)
 
         # 一般設定區域
-        self.create_general_settings(form_container.interior)
+        self.create_general_settings(content_container)
 
         # 連接設定區域
-        self.create_connection_settings(form_container.interior)
+        self.create_connection_settings(content_container)
 
         # 數據設定區域
-        self.create_data_settings(form_container.interior)
+        self.create_data_settings(content_container)
 
         # 按鈕區域
-        self.create_action_buttons(form_container.interior)
+        self.create_action_buttons(content_container)
 
     def create_general_settings(self, parent):
         """創建一般設定區域"""
@@ -252,51 +278,6 @@ class SettingsFrame(tk.Frame):
         auto_detect_check.pack(anchor="w", padx=10, pady=10)
 
     def create_data_settings(self, parent):
-        """創建數據設定區域"""
-        # 標題
-        title_label = tk.Label(
-            parent,
-            text="數據設定",
-            bg="#1e293b",
-            fg="white",
-            font=("Noto Sans TC", 18, "bold")
-        )
-        title_label.pack(anchor="w", padx=50, pady=(30, 10))
-
-        # 數據刷新頻率
-        refresh_label = tk.Label(
-            parent,
-            text="數據刷新頻率",
-            bg="#1e293b",
-            fg="white",
-            font=("Noto Sans TC", 14)
-        )
-        refresh_label.pack(anchor="w", padx=50, pady=(10, 5))
-
-        refresh_frame = RoundedFrame(
-            parent,
-            bg_color="#0f172a",
-            corner_radius=8,
-            border_width=0
-        )
-        refresh_frame.pack(fill="x", padx=50, pady=5)
-
-        refresh_options = ["高 (5秒)", "中 (10秒)", "低 (30秒)"]
-        for option in refresh_options:
-            radio = tk.Radiobutton(
-                refresh_frame.interior,
-                text=option,
-                variable=self.refresh_rate,
-                value=option,
-                bg="#0f172a",
-                fg="white",
-                selectcolor="#0f172a",
-                activebackground="#0f172a",
-                font=("Noto Sans TC", 12),
-                command=self.refresh_rate_changed
-            )
-            radio.pack(side="left", padx=20, pady=10)
-
         # 數據緩存
         cache_label = tk.Label(
             parent,
@@ -345,7 +326,7 @@ class SettingsFrame(tk.Frame):
             corner_radius=8,
             border_width=0
         )
-        button_frame.pack(fill="x", padx=50, pady=(30, 40))
+        button_frame.pack(fill="x", padx=50, pady=(20, 30), side="bottom")
 
         # 重置按鈕
         reset_button = RoundedButton(
@@ -421,12 +402,6 @@ class SettingsFrame(tk.Frame):
         print(f"自動檢測已{'啟用' if is_auto_detect else '停用'}")
         # TODO: 實現自動檢測邏輯
 
-    def refresh_rate_changed(self):
-        """刷新頻率設定變更時的處理"""
-        selected_rate = self.refresh_rate.get()
-        print(f"數據刷新頻率已變更為: {selected_rate}")
-        # TODO: 實現刷新頻率變更邏輯
-
     def toggle_cache(self):
         """切換緩存選項"""
         is_cache_enabled = self.enable_cache.get()
@@ -435,29 +410,42 @@ class SettingsFrame(tk.Frame):
 
     def reset_settings(self):
         """重置設定為預設值"""
-        print("重置設定為預設值")
-
-        # 重置所有設定
-        self.lockfile_path.set("C:\\Riot Games\\League of Legends\\lockfile")
-        self.language.set("中文")
-        self.theme.set("暗色主題")
-        self.auto_detect.set(True)
-        self.refresh_rate.set("高 (5秒)")
-        self.enable_cache.set(True)
-
-        # TODO: 實現重置設定邏輯
+        if messagebox.askyesno("確認重置", "確定要將所有設定重置為預設值嗎？"):
+            # 重置所有設定
+            self.lockfile_path.set("C:\\Riot Games\\League of Legends\\lockfile")
+            self.language.set("中文")
+            self.theme.set("暗色主題")
+            self.auto_detect.set(True)
+            self.enable_cache.set(True)
+            messagebox.showinfo("成功", "設定已重置為預設值")
 
     def save_settings(self):
         """保存設定"""
-        print("保存設定")
-        # TODO: 實現保存設定邏輯
+        try:
+            # 創建設定字典
+            settings = {
+                'lockfile_path': self.lockfile_path.get(),
+                'language': self.language.get(),
+                'theme': self.theme.get(),
+                'auto_detect': self.auto_detect.get(),
+                'enable_cache': self.enable_cache.get()
+            }
 
-        # 回到上一頁
-        self.controller.show_champion_list()
+            # 保存到文件
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(settings, f, ensure_ascii=False, indent=4)
+
+            messagebox.showinfo("成功", "設定已保存")
+            
+            # 回到上一頁
+            self.controller.show_champion_list()
+        except Exception as e:
+            messagebox.showerror("錯誤", f"保存設定時發生錯誤：{str(e)}")
 
     def cancel_settings(self):
         """取消設定變更"""
-        print("取消設定變更")
-
-        # 回到上一頁
-        self.controller.show_champion_list()
+        if messagebox.askyesno("確認取消", "確定要取消所有設定變更嗎？"):
+            # 重新加載設定
+            self.load_settings()
+            # 回到上一頁
+            self.controller.show_champion_list()

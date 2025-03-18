@@ -475,25 +475,6 @@ class ARAMAnalyzerApp:
             btn.pack(side="left", padx=5)
             self.nav_buttons[text] = btn
 
-        # 添加右側工具欄
-        tools_frame = tk.Frame(nav_bar.interior, bg=self.nav_bg)
-        tools_frame.pack(side="right", padx=20, pady=10)
-
-        # 刷新按鈕
-        refresh_btn = RoundedButton(
-            tools_frame,
-            text="刷新",
-            command=self.refresh_data,
-            font=(self.font_family, nav_size),
-            padx=15,
-            pady=5,
-            radius=8,
-            bg=self.button_bg,
-            fg=self.text_color,
-            highlight_color=self.highlight_color
-        )
-        refresh_btn.pack(side="right", padx=5)
-
     def toggle_real_time(self):
         """切換實時模式"""
         # TODO: 實現實時模式的切換邏輯
@@ -513,6 +494,8 @@ class ARAMAnalyzerApp:
             if data:
                 # 更新当前页面
                 self.refresh_current_page()
+            else:
+                print("无法获取任何数据")
         except Exception as e:
             print(f"数据刷新失败: {str(e)}")
 
@@ -520,16 +503,16 @@ class ARAMAnalyzerApp:
         """刷新當前頁面"""
         # 獲取當前頁面並刷新
         for name, button in self.nav_buttons.items():
-            if button.bg_color == self.button_bg:  # 注意: 用 bg_color 而不是 cget("bg")
-                if name == "team_comp":
+            if button.selected:  # 使用 selected 屬性來判斷當前選中的按鈕
+                if name == "陣容推薦":
                     self.show_team_comp(refresh=True)
-                elif name == "stats":
+                elif name == "數據分析":
                     self.show_stats_analysis(refresh=True)
-                elif name == "teammates":
+                elif name == "隊友數據":
                     self.show_teammate_stats(refresh=True)
-                elif name == "settings":
+                elif name == "設定":
                     self.show_settings(refresh=True)
-                elif name == "champ_list":
+                elif name == "英雄列表":
                     self.show_champion_list(refresh=True)
                 return
 
@@ -615,12 +598,45 @@ class ARAMAnalyzerApp:
         )
         container.pack(fill="both", expand=True, padx=5, pady=5)
 
+        # 創建頂部工具欄
+        toolbar = tk.Frame(container.interior, bg=self.content_area_bg)
+        toolbar.pack(fill="x", padx=10, pady=5)
+
+        # 添加刷新按鈕
+        refresh_btn = RoundedButton(
+            toolbar,
+            text="刷新",
+            command=self.refresh_team_comp,
+            font=(self.font_family, 12),
+            padx=15,
+            pady=5,
+            radius=8,
+            bg=self.button_bg,
+            fg=self.text_color,
+            highlight_color=self.highlight_color
+        )
+        refresh_btn.pack(side="right")
+
         # 在圓角容器內放置原始的 TeamCompFrame
         team_comp_frame = TeamCompFrame(container.interior, self)
         team_comp_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
         # 更新子頁面的字體
         self.update_child_frame_fonts(team_comp_frame)
+
+    def refresh_team_comp(self):
+        """刷新陣容推薦頁面"""
+        try:
+            # 獲取當前 TeamCompFrame 實例
+            for widget in self.content_frame.interior.winfo_children():
+                if isinstance(widget, RoundedFrame):
+                    for child in widget.interior.winfo_children():
+                        if isinstance(child, TeamCompFrame):
+                            # 重新載入數據
+                            child.load_team_comp_data()
+                            return
+        except Exception as e:
+            print(f"刷新陣容推薦頁面時出錯: {str(e)}")
 
     def _prepare_champion_data(self):
         """準備英雄數據，包括圖片"""
