@@ -1,24 +1,140 @@
 import tkinter as tk
+import logging
+import threading
+from typing import Dict, Any, Optional
+from PIL import Image, ImageTk
+
+from api_client import AramAPIClient
+
+# 設定日誌
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class ChampionDetailFrame(tk.Frame):
-    def __init__(self, parent, controller, champion_name):
+    def __init__(self, parent, controller, champion_id):
         super().__init__(parent, bg="#1a1a2e")
         self.controller = controller
-        self.champion_name = champion_name
+        self.champion_id = champion_id
 
-        # 創建英雄詳細頁面
-        self.create_champion_detail_page()
+        # 初始化API客戶端
+        self.api_client = AramAPIClient()
+
+        # 創建載入中狀態
+        self.loading = False
+
+        # 創建載入指示器
+        self.create_loading_indicator()
+
+        # 創建主要容器
+        self.main_container = tk.Frame(self, bg="#1a1a2e")
+        self.main_container.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # 顯示載入指示器
+        self.show_loading()
+
+        # 載入英雄詳細資料
+        self.champion_data = None
+        self.load_champion_detail()
+
+    def create_loading_indicator(self):
+        """創建載入指示器"""
+        self.loading_frame = tk.Frame(self, bg="#1a1a2e")
+        self.loading_frame.pack(fill="both", expand=True)
+
+        self.loading_label = tk.Label(
+            self.loading_frame,
+            text="載入中...",
+            bg="#1a1a2e",
+            fg="white",
+            font=("Arial", 14)
+        )
+        self.loading_label.pack(expand=True, pady=100)
+
+    def show_loading(self):
+        """顯示載入指示器"""
+        self.loading = True
+        self.main_container.pack_forget()
+        self.loading_frame.pack(fill="both", expand=True)
+
+    def hide_loading(self):
+        """隱藏載入指示器"""
+        self.loading = False
+        self.loading_frame.pack_forget()
+        self.main_container.pack(fill="both", expand=True, padx=10, pady=10)
+
+    def load_champion_detail(self):
+        """載入英雄詳細資料"""
+
+        def fetch_data():
+            try:
+                # 從API獲取英雄詳細資料
+                champion_data = self.api_client.get_champion_detail(self.champion_id)
+                self.champion_data = champion_data
+
+                # 在主執行緒中更新UI
+                if not self._is_destroyed():
+                    self.after(0, self.create_champion_detail_page)
+
+            except Exception as e:
+                logger.error(f"載入英雄詳細資料失敗: {str(e)}")
+
+                # 顯示錯誤訊息
+                if not self._is_destroyed():
+                    self.after(0, lambda: self.show_error(f"載入資料失敗: {str(e)}"))
+
+        # 在背景執行緒中獲取資料
+        threading.Thread(target=fetch_data, daemon=True).start()
+
+    def show_error(self, message):
+        """
+        顯示錯誤訊息
+
+        Args:
+            message: 錯誤訊息
+        """
+        # 清空主容器
+        for widget in self.main_container.winfo_children():
+            widget.destroy()
+
+        # 添加返回按鈕
+        back_button = tk.Button(
+            self.main_container,
+            text="返回列表",
+            bg="#0f3460",
+            fg="white",
+            relief="flat",
+            font=("Arial", 10),
+            command=self.controller.show_champion_list
+        )
+        back_button.pack(anchor="nw", pady=10)
+
+        # 顯示錯誤訊息
+        error_label = tk.Label(
+            self.main_container,
+            text=message,
+            bg="#1a1a2e",
+            fg="#e94560",
+            font=("Arial", 12)
+        )
+        error_label.pack(expand=True, pady=50)
+
+        # 隱藏載入指示器
+        self.hide_loading()
 
     def create_champion_detail_page(self):
         """創建英雄詳細頁面"""
-        # 主要容器
-        main_container = tk.Frame(self, bg="#1a1a2e")
-        main_container.pack(fill="both", expand=True, padx=10, pady=10)
+        if not self.champion_data:
+            self.show_error("無法載入英雄資料")
+            return
+
+        # 清空主容器
+        for widget in self.main_container.winfo_children():
+            widget.destroy()
 
         # 返回按鈕
         back_button = tk.Button(
-            main_container,
+            self.main_container,
             text="返回列表",
             bg="#0f3460",
             fg="white",
@@ -29,10 +145,10 @@ class ChampionDetailFrame(tk.Frame):
         back_button.pack(anchor="nw", pady=10)
 
         # 上方英雄資訊區
-        self.create_hero_info_section(main_container)
+        self.create_hero_info_section(self.main_container)
 
         # 下方分為左右兩個區域
-        lower_container = tk.Frame(main_container, bg="#1a1a2e")
+        lower_container = tk.Frame(self.main_container, bg="#1a1a2e")
         lower_container.pack(fill="both", expand=True, pady=10)
 
         # 左側數據顯示區域
@@ -41,8 +157,13 @@ class ChampionDetailFrame(tk.Frame):
         # 右側推薦區域
         self.create_recommendations_section(lower_container)
 
+        # 隱藏載入指示器
+        self.hide_loading()
+
     def create_hero_info_section(self, parent):
         """創建英雄資訊區域"""
+        basic_info = self.champion_data.get('basic_info', {})
+
         hero_info_frame = tk.Frame(parent, bg="#16213e", height=120)
         hero_info_frame.pack(fill="x", pady=10)
         hero_info_frame.pack_propagate(False)
@@ -51,22 +172,51 @@ class ChampionDetailFrame(tk.Frame):
         icon_frame = tk.Frame(hero_info_frame, bg="#0f3460", width=100, height=100)
         icon_frame.place(x=30, y=10)
 
-        # 英雄名稱和類型
+        # 嘗試載入英雄圖示
+        champion_id = basic_info.get('champion_id', '')
+        champion_key = basic_info.get('key', 0)
+
+        # 檢查控制器是否有champ_images屬性和對應的圖片
+        if hasattr(self.controller, 'champ_images'):
+            # 優先使用championId查找
+            if champion_id in self.controller.champ_images:
+                icon = self.controller.champ_images[champion_id]
+                icon_label = tk.Label(icon_frame, image=icon, bg="#0f3460")
+                icon_label.place(relx=0.5, rely=0.5, anchor="center")
+            # 然後嘗試使用key查找
+            elif str(champion_key) in self.controller.champ_images:
+                icon = self.controller.champ_images[str(champion_key)]
+                icon_label = tk.Label(icon_frame, image=icon, bg="#0f3460")
+                icon_label.place(relx=0.5, rely=0.5, anchor="center")
+
+        # 英雄名稱
+        champion_name = basic_info.get('champion_name', '')
+        champion_tw_name = basic_info.get('champion_tw_name', '')
+        display_name = champion_name
+        if champion_tw_name:
+            display_name = f"{champion_name} {champion_tw_name}"
+
         hero_name = tk.Label(
             hero_info_frame,
-            text=self.champion_name,
+            text=display_name,
             bg="#16213e",
             fg="white",
             font=("Arial", 16, "bold")
         )
         hero_name.place(x=150, y=25)
 
-        # 獲取英雄類型
-        champion_type = self.get_champion_type(self.champion_name)
+        # 英雄類型和難度
+        champion_type = basic_info.get('champion_type', '')
+        champion_difficulty = basic_info.get('champion_difficulty', 2)
+
+        # 生成難度星級
+        difficulty_stars = "★" * champion_difficulty + "☆" * (3 - champion_difficulty)
+
+        type_text = f"{champion_type} • 難度: {difficulty_stars}"
 
         hero_type = tk.Label(
             hero_info_frame,
-            text=champion_type,
+            text=type_text,
             bg="#16213e",
             fg="#8b8b8b",
             font=("Arial", 10)
@@ -77,12 +227,12 @@ class ChampionDetailFrame(tk.Frame):
         rank_frame = tk.Frame(hero_info_frame, bg="#0f3460", width=200, height=80)
         rank_frame.place(x=950, y=20)
 
-        # 獲取英雄排名信息
-        rank_info = self.get_champion_rank(self.champion_name)
+        tier = basic_info.get('tier', '')
+        tier_text = f"{tier} 級英雄" if tier else "未分級"
 
         rank_label = tk.Label(
             rank_frame,
-            text=rank_info["tier"],
+            text=tier_text,
             bg="#0f3460",
             fg="white",
             font=("Arial", 14, "bold")
@@ -91,7 +241,7 @@ class ChampionDetailFrame(tk.Frame):
 
         rank_desc = tk.Label(
             rank_frame,
-            text=rank_info["desc"],
+            text=basic_info.get('rank_desc', ''),
             bg="#0f3460",
             fg="#4ecca3",
             font=("Arial", 10)
@@ -100,6 +250,8 @@ class ChampionDetailFrame(tk.Frame):
 
     def create_stats_section(self, parent):
         """創建左側數據顯示區域"""
+        stats = self.champion_data.get('stats', {})
+
         stats_frame = tk.Frame(parent, bg="#16213e", width=460)
         stats_frame.pack(side="left", fill="both", expand=True, padx=(0, 10))
 
@@ -117,9 +269,6 @@ class ChampionDetailFrame(tk.Frame):
         separator = tk.Frame(stats_frame, bg="#e94560", height=1)
         separator.pack(fill="x", padx=20, pady=5)
 
-        # 獲取英雄統計數據
-        champion_stats = self.get_champion_stats(self.champion_name)
-
         # 關鍵數據
         key_stats_frame = tk.Frame(stats_frame, bg="#0f3460", height=100)
         key_stats_frame.pack(fill="x", padx=20, pady=10)
@@ -136,7 +285,7 @@ class ChampionDetailFrame(tk.Frame):
 
         win_rate_label2 = tk.Label(
             key_stats_frame,
-            text=f"{champion_stats['win_rate']}%",
+            text=f"{stats.get('win_rate', 0)}%",
             bg="#0f3460",
             fg="#4ecca3",
             font=("Arial", 16, "bold")
@@ -155,7 +304,7 @@ class ChampionDetailFrame(tk.Frame):
 
         pick_rate_label2 = tk.Label(
             key_stats_frame,
-            text=f"{champion_stats['pick_rate']}%",
+            text=f"{stats.get('pick_rate', 0)}%",
             bg="#0f3460",
             fg="white",
             font=("Arial", 16, "bold")
@@ -174,7 +323,7 @@ class ChampionDetailFrame(tk.Frame):
 
         ban_rate_label2 = tk.Label(
             key_stats_frame,
-            text=f"{champion_stats['ban_rate']}%",
+            text=f"{stats.get('ban_rate', 0)}%",
             bg="#0f3460",
             fg="white",
             font=("Arial", 16, "bold")
@@ -206,7 +355,7 @@ class ChampionDetailFrame(tk.Frame):
 
         kda_label2 = tk.Label(
             metrics_frame,
-            text=champion_stats["kda"],
+            text=stats.get("kda", "0/0/0"),
             bg="#0f3460",
             fg="white",
             font=("Arial", 10)
@@ -215,7 +364,7 @@ class ChampionDetailFrame(tk.Frame):
 
         kda_ratio = tk.Label(
             metrics_frame,
-            text=f"KDA比: {champion_stats['kda_ratio']}",
+            text=f"KDA比: {stats.get('kda_ratio', 0)}",
             bg="#0f3460",
             fg="#4ecca3",
             font=("Arial", 10, "bold")
@@ -234,7 +383,7 @@ class ChampionDetailFrame(tk.Frame):
 
         damage_label2 = tk.Label(
             metrics_frame,
-            text=champion_stats["damage"],
+            text=stats.get("damage", "0"),
             bg="#0f3460",
             fg="white",
             font=("Arial", 10)
@@ -243,7 +392,7 @@ class ChampionDetailFrame(tk.Frame):
 
         damage_ratio = tk.Label(
             metrics_frame,
-            text=f"隊伍占比: {champion_stats['damage_percentage']}",
+            text=f"隊伍占比: {stats.get('damage_percentage', '0%')}",
             bg="#0f3460",
             fg="#8b8b8b",
             font=("Arial", 10)
@@ -262,7 +411,7 @@ class ChampionDetailFrame(tk.Frame):
 
         healing_label2 = tk.Label(
             metrics_frame,
-            text=champion_stats["healing"],
+            text=stats.get("healing", "0"),
             bg="#0f3460",
             fg="white",
             font=("Arial", 10)
@@ -271,7 +420,7 @@ class ChampionDetailFrame(tk.Frame):
 
         healing_ratio = tk.Label(
             metrics_frame,
-            text=f"隊伍占比: {champion_stats['healing_percentage']}",
+            text=f"隊伍占比: {stats.get('healing_percentage', '0%')}",
             bg="#0f3460",
             fg="#8b8b8b",
             font=("Arial", 10)
@@ -290,7 +439,7 @@ class ChampionDetailFrame(tk.Frame):
 
         taken_label2 = tk.Label(
             metrics_frame,
-            text=champion_stats["damage_taken"],
+            text=stats.get("damage_taken", "0"),
             bg="#0f3460",
             fg="white",
             font=("Arial", 10)
@@ -299,7 +448,7 @@ class ChampionDetailFrame(tk.Frame):
 
         taken_ratio = tk.Label(
             metrics_frame,
-            text=f"隊伍占比: {champion_stats['damage_taken_percentage']}",
+            text=f"隊伍占比: {stats.get('damage_taken_percentage', '0%')}",
             bg="#0f3460",
             fg="#8b8b8b",
             font=("Arial", 10)
@@ -309,7 +458,7 @@ class ChampionDetailFrame(tk.Frame):
         # 勝率趨勢
         trend_title = tk.Label(
             stats_frame,
-            text="勝率趨勢 (最近5個版本)",
+            text=f"勝率趨勢 (最近{len(stats.get('trend_versions', []))}個版本)",
             bg="#16213e",
             fg="white",
             font=("Arial", 12, "bold")
@@ -319,35 +468,45 @@ class ChampionDetailFrame(tk.Frame):
         trend_frame = tk.Frame(stats_frame, bg="#0f3460", height=160)
         trend_frame.pack(fill="x", padx=20, pady=10)
 
-        # 在這裡繪製趨勢圖
-        # 簡單模擬一個趨勢圖區域
+        # 繪製趨勢圖
         trend_canvas = tk.Canvas(trend_frame, bg="#0f3460", highlightthickness=0)
         trend_canvas.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # 水平網格線
-        for i in range(5):
-            y = 20 + i * 25
-            trend_canvas.create_line(20, y, 400, y, fill="#ffffff", width=1, dash=(2, 2))
-            trend_canvas.create_text(18, y, text=f"{75 - i * 5}%", anchor="e", fill="white", font=("Arial", 8))
+        # 取得趨勢資料
+        trend_data = stats.get("trend_data", [])
+        versions = stats.get("trend_versions", [])
 
-        # 垂直標籤 (版本號)
-        versions = ["14.3", "14.4", "14.5", "14.6", "14.7", "14.8"]
-        for i, version in enumerate(versions):
-            x = 20 + i * 76
-            trend_canvas.create_text(x, 130, text=version, anchor="n", fill="white", font=("Arial", 8))
+        # 確保有資料可繪製
+        if trend_data and versions:
+            # 水平網格線
+            for i in range(5):
+                y = 20 + i * 25
+                trend_canvas.create_line(20, y, 400, y, fill="#ffffff", width=1, dash=(2, 2))
+                win_rate = int(max(trend_data)) + 5 - i * 5
+                trend_canvas.create_text(18, y, text=f"{win_rate}%", anchor="e", fill="white", font=("Arial", 8))
 
-        # 趨勢線
-        trend_data = champion_stats["trend_data"]
-        points = []
-        for i, value in enumerate(trend_data):
-            x = 20 + i * 76
-            y = 120 - value * 1.2  # 簡單映射到畫布高度
-            points.append((x, y))
+            # 垂直標籤 (版本號)
+            for i, version in enumerate(versions):
+                if i < len(trend_data):  # 確保有對應的資料點
+                    x = 20 + i * (380 / (len(versions) - 1 if len(versions) > 1 else 1))
+                    trend_canvas.create_text(x, 130, text=version, anchor="n", fill="white", font=("Arial", 8))
 
-        trend_canvas.create_line(points, fill="#4ecca3", width=2, smooth=True)
+            # 繪製趨勢線
+            points = []
+            max_value = max(trend_data)
+            min_value = min(trend_data)
+            range_value = max(10, max_value - min_value + 10)  # 確保有適當的範圍
 
-        for x, y in points:
-            trend_canvas.create_oval(x - 3, y - 3, x + 3, y + 3, fill="#4ecca3", outline="#4ecca3")
+            for i, value in enumerate(trend_data):
+                x = 20 + i * (380 / (len(trend_data) - 1 if len(trend_data) > 1 else 1))
+                y = 120 - ((value - min_value) / range_value) * 100
+                points.append((x, y))
+
+            if len(points) > 1:
+                trend_canvas.create_line(points, fill="#4ecca3", width=2, smooth=True)
+
+            for x, y in points:
+                trend_canvas.create_oval(x - 3, y - 3, x + 3, y + 3, fill="#4ecca3", outline="#4ecca3")
 
     def create_recommendations_section(self, parent):
         """創建右側推薦區域"""
@@ -368,29 +527,47 @@ class ChampionDetailFrame(tk.Frame):
         separator = tk.Frame(recommendations_frame, bg="#e94560", height=1)
         separator.pack(fill="x", padx=20, pady=5)
 
-        # 獲取推薦構建數據
-        recommendations = self.get_champion_recommendations(self.champion_name)
-
         # 符文配置
+        self.create_runes_section(recommendations_frame)
+
+        # 裝備建議
+        self.create_items_section(recommendations_frame)
+
+        # 技能加點順序
+        self.create_skills_section(recommendations_frame)
+
+        # ARAM 攻略要點
+        self.create_tips_section(recommendations_frame)
+
+    def create_runes_section(self, parent):
+        """創建符文配置區域"""
+        runes = self.champion_data.get('runes', [])
+
+        if not runes:
+            return
+
+        # 使用第一個符文配置
+        rune_data = runes[0] if runes else {}
+
         runes_title = tk.Label(
-            recommendations_frame,
-            text=f"符文配置 (勝率: {recommendations['runes_win_rate']}%)",
+            parent,
+            text=f"符文配置 (勝率: {rune_data.get('runes_win_rate', 0)}%)",
             bg="#16213e",
             fg="white",
             font=("Arial", 12, "bold")
         )
         runes_title.pack(anchor="w", padx=20, pady=(20, 0))
 
-        runes_frame = tk.Frame(recommendations_frame, bg="#0f3460", height=120)
+        runes_frame = tk.Frame(parent, bg="#0f3460", height=120)
         runes_frame.pack(fill="x", padx=20, pady=10)
 
         # 主系符文
-        primary_rune = tk.Frame(runes_frame, bg="#16213e", width=50, height=50)
-        primary_rune.place(x=40, y=35)
+        primary_rune_frame = tk.Frame(runes_frame, bg="#16213e", width=50, height=50)
+        primary_rune_frame.place(x=40, y=35)
 
         primary_label = tk.Label(
             runes_frame,
-            text=recommendations["primary_rune"],
+            text=rune_data.get('primary_rune', ''),
             bg="#0f3460",
             fg="white",
             font=("Arial", 8)
@@ -398,7 +575,8 @@ class ChampionDetailFrame(tk.Frame):
         primary_label.place(x=40, y=90)
 
         # 次要符文 (簡化版)
-        for i, rune in enumerate(recommendations["secondary_runes"]):
+        secondary_runes = rune_data.get('secondary_runes', [])
+        for i, rune in enumerate(secondary_runes[:3]):  # 限制最多顯示3個
             rune_frame = tk.Frame(runes_frame, bg="#16213e", width=30, height=30)
             rune_frame.place(x=100 + i * 50, y=35)
 
@@ -412,12 +590,12 @@ class ChampionDetailFrame(tk.Frame):
             rune_label.place(x=100 + i * 50, y=70, anchor="center")
 
         # 副系符文
-        secondary_title = tk.Frame(runes_frame, bg="#16213e", width=40, height=40)
-        secondary_title.place(x=280, y=35)
+        secondary_title_frame = tk.Frame(runes_frame, bg="#16213e", width=40, height=40)
+        secondary_title_frame.place(x=280, y=35)
 
         secondary_title_label = tk.Label(
             runes_frame,
-            text=recommendations["secondary_path"],
+            text=rune_data.get('secondary_path', ''),
             bg="#0f3460",
             fg="white",
             font=("Arial", 8)
@@ -425,7 +603,8 @@ class ChampionDetailFrame(tk.Frame):
         secondary_title_label.place(x=280, y=80)
 
         # 副系符文選擇
-        for i, choice in enumerate(recommendations["secondary_choices"]):
+        secondary_choices = rune_data.get('secondary_choices', [])
+        for i, choice in enumerate(secondary_choices[:2]):  # 限制最多顯示2個
             choice_frame = tk.Frame(runes_frame, bg="#16213e", width=30, height=30)
             choice_frame.place(x=330 + i * 50, y=35)
 
@@ -439,7 +618,8 @@ class ChampionDetailFrame(tk.Frame):
             choice_label.place(x=330 + i * 50, y=70, anchor="center")
 
         # 符文碎片
-        for i, shard in enumerate(recommendations["shards"]):
+        shards = rune_data.get('shards', [])
+        for i, shard in enumerate(shards[:3]):  # 限制最多顯示3個
             shard_frame = tk.Frame(runes_frame, bg="#16213e", width=15, height=15)
             shard_frame.place(x=430, y=20 + i * 20)
 
@@ -452,9 +632,18 @@ class ChampionDetailFrame(tk.Frame):
             )
             shard_label.place(x=455, y=20 + i * 20)
 
-        # 裝備建議
+    def create_items_section(self, parent):
+        """創建裝備建議區域"""
+        builds = self.champion_data.get('builds', [])
+
+        if not builds:
+            return
+
+        # 使用第一個裝備配置
+        build_data = builds[0] if builds else {}
+
         items_title = tk.Label(
-            recommendations_frame,
+            parent,
             text="最佳裝備構建",
             bg="#16213e",
             fg="white",
@@ -462,7 +651,7 @@ class ChampionDetailFrame(tk.Frame):
         )
         items_title.pack(anchor="w", padx=20, pady=(20, 0))
 
-        items_frame = tk.Frame(recommendations_frame, bg="#0f3460", height=110)
+        items_frame = tk.Frame(parent, bg="#0f3460", height=110)
         items_frame.pack(fill="x", padx=20, pady=10)
 
         # 起始裝備
@@ -475,7 +664,8 @@ class ChampionDetailFrame(tk.Frame):
         )
         start_label.place(x=20, y=15)
 
-        for i, item in enumerate(recommendations["starting_items"]):
+        starting_items = build_data.get('starting_items', [])
+        for i, item in enumerate(starting_items[:2]):  # 限制最多顯示2個
             item_frame = tk.Frame(items_frame, bg="#16213e", width=40, height=40)
             item_frame.place(x=20 + i * 50, y=40)
 
@@ -499,7 +689,8 @@ class ChampionDetailFrame(tk.Frame):
         )
         core_label.place(x=150, y=15)
 
-        for i, item in enumerate(recommendations["core_items"]):
+        core_items = build_data.get('core_items', [])
+        for i, item in enumerate(core_items[:4]):  # 限制最多顯示4個
             item_frame = tk.Frame(items_frame, bg="#16213e", width=40, height=40)
             item_frame.place(x=150 + i * 50, y=40)
 
@@ -523,7 +714,8 @@ class ChampionDetailFrame(tk.Frame):
         )
         optional_label.place(x=380, y=15)
 
-        for i, item in enumerate(recommendations["optional_items"]):
+        optional_items = build_data.get('optional_items', [])
+        for i, item in enumerate(optional_items[:4]):  # 限制最多顯示4個
             item_frame = tk.Frame(items_frame, bg="#16213e", width=40, height=40)
             item_frame.place(x=380 + i * 50, y=40)
 
@@ -549,16 +741,19 @@ class ChampionDetailFrame(tk.Frame):
 
         win_rate_value = tk.Label(
             items_frame,
-            text=f"{recommendations['build_win_rate']}%",
+            text=f"{build_data.get('build_win_rate', 0)}%",
             bg="#0f3460",
             fg="#4ecca3",
             font=("Arial", 10, "bold")
         )
         win_rate_value.place(x=120, y=90)
 
-        # 技能加點順序
+    def create_skills_section(self, parent):
+        """創建技能加點順序區域"""
+        skills = self.champion_data.get('skills', {})
+
         skills_title = tk.Label(
-            recommendations_frame,
+            parent,
             text="技能加點順序",
             bg="#16213e",
             fg="white",
@@ -566,7 +761,7 @@ class ChampionDetailFrame(tk.Frame):
         )
         skills_title.pack(anchor="w", padx=20, pady=(20, 0))
 
-        skills_frame = tk.Frame(recommendations_frame, bg="#0f3460", height=80)
+        skills_frame = tk.Frame(parent, bg="#0f3460", height=80)
         skills_frame.pack(fill="x", padx=20, pady=10)
 
         # 技能按鈕
@@ -587,7 +782,7 @@ class ChampionDetailFrame(tk.Frame):
         # 加點說明
         order_label = tk.Label(
             skills_frame,
-            text=f"加點順序: {recommendations['skill_order']}",
+            text=f"加點順序: {skills.get('skill_order', 'R > Q > W > E')}",
             bg="#0f3460",
             fg="white",
             font=("Arial", 10)
@@ -596,16 +791,19 @@ class ChampionDetailFrame(tk.Frame):
 
         first_label = tk.Label(
             skills_frame,
-            text=f"首選: {recommendations['first_skill']}",
+            text=f"首選: {skills.get('first_skill', 'Q')}",
             bg="#0f3460",
             fg="white",
             font=("Arial", 10)
         )
         first_label.place(x=240, y=45)
 
-        # ARAM 攻略要點
+    def create_tips_section(self, parent):
+        """創建攻略要點區域"""
+        tips = self.champion_data.get('tips', [])
+
         tips_title = tk.Label(
-            recommendations_frame,
+            parent,
             text="ARAM 攻略要點",
             bg="#16213e",
             fg="white",
@@ -613,11 +811,11 @@ class ChampionDetailFrame(tk.Frame):
         )
         tips_title.pack(anchor="w", padx=20, pady=(20, 0))
 
-        tips_frame = tk.Frame(recommendations_frame, bg="#0f3460", height=80)
+        tips_frame = tk.Frame(parent, bg="#0f3460", height=80)
         tips_frame.pack(fill="x", padx=20, pady=10)
 
         # 攻略要點
-        for i, tip in enumerate(recommendations["tips"]):
+        for i, tip in enumerate(tips[:3]):  # 限制最多顯示3個提示
             tip_label = tk.Label(
                 tips_frame,
                 text=tip,
@@ -628,187 +826,9 @@ class ChampionDetailFrame(tk.Frame):
             )
             tip_label.place(x=20, y=15 + i * 25)
 
-    def get_champion_type(self, champion_name):
-        """獲取英雄類型 (模擬數據)"""
-        champion_types = {
-            "Sona 索娜": "輔助 • 難度: ★☆☆ • 推薦位置: 後排支援",
-            "Seraphine 瑟菈紛": "輔助/法師 • 難度: ★★☆ • 推薦位置: 後排支援",
-            "Ziggs 希格斯": "法師 • 難度: ★★☆ • 推薦位置: 後排輸出",
-            "Ashe 艾希": "射手 • 難度: ★☆☆ • 推薦位置: 後排輸出",
-            "Maokai 茂凱": "坦克 • 難度: ★★☆ • 推薦位置: 前排肉盾",
-            "Kayle 凱爾": "戰士/法師 • 難度: ★★★ • 推薦位置: 中後排漸進式輸出",
-            "Brand 布蘭德": "法師 • 難度: ★★☆ • 推薦位置: 後排AOE輸出",
-            "Swain 斯溫": "法師/戰士 • 難度: ★★★ • 推薦位置: 中排持續輸出",
-            "Veigar 維迦": "法師 • 難度: ★★☆ • 推薦位置: 後排爆發控制",
-            "Nasus 納瑟斯": "戰士/坦克 • 難度: ★★☆ • 推薦位置: 前排輸出",
-            "Xerath 齊勒斯": "法師 • 難度: ★★★ • 推薦位置: 後排長距離輸出",
-            "Leona 雷歐娜": "坦克/輔助 • 難度: ★★☆ • 推薦位置: 前排開團控制"
-        }
-
-        # 如果找不到特定英雄，返回一個默認值
-        return champion_types.get(champion_name, "未知 • 難度: ★★☆ • 推薦位置: 未知")
-
-    def get_champion_rank(self, champion_name):
-        """獲取英雄排名信息 (模擬數據)"""
-        champion_ranks = {
-            "Sona 索娜": {"tier": "S 級英雄", "desc": "ARAM 勝率第 1 名"},
-            "Seraphine 瑟菈紛": {"tier": "S 級英雄", "desc": "ARAM 勝率第 2 名"},
-            "Ziggs 希格斯": {"tier": "S 級英雄", "desc": "ARAM 勝率第 3 名"},
-            "Ashe 艾希": {"tier": "S 級英雄", "desc": "ARAM 勝率第 4 名"},
-            "Maokai 茂凱": {"tier": "S 級英雄", "desc": "ARAM 勝率第 5 名"},
-            "Kayle 凱爾": {"tier": "A 級英雄", "desc": "ARAM 勝率第 6 名"},
-            "Brand 布蘭德": {"tier": "A 級英雄", "desc": "ARAM 勝率第 7 名"},
-            "Swain 斯溫": {"tier": "A 級英雄", "desc": "ARAM 勝率第 8 名"},
-            "Veigar 維迦": {"tier": "A 級英雄", "desc": "ARAM 勝率第 9 名"},
-            "Nasus 納瑟斯": {"tier": "A 級英雄", "desc": "ARAM 勝率第 10 名"},
-            "Xerath 齊勒斯": {"tier": "A 級英雄", "desc": "ARAM 勝率第 11 名"},
-            "Leona 雷歐娜": {"tier": "A 級英雄", "desc": "ARAM 勝率第 12 名"}
-        }
-
-        # 如果找不到特定英雄，返回一個默認值
-        return champion_ranks.get(champion_name, {"tier": "未知", "desc": "排名未知"})
-
-    def get_champion_stats(self, champion_name):
-        """獲取英雄統計數據 (模擬數據)"""
-        champion_stats = {
-            "Sona 索娜": {
-                "win_rate": 65.2,
-                "pick_rate": 8.5,
-                "ban_rate": 2.3,
-                "kda": "6.3 / 4.8 / 22.1",
-                "kda_ratio": "5.9",
-                "damage": "18,500",
-                "damage_percentage": "17%",
-                "healing": "25,600",
-                "healing_percentage": "65%",
-                "damage_taken": "16,200",
-                "damage_taken_percentage": "14%",
-                "trend_data": [60, 62, 63, 67, 70, 72]
-            },
-            "Seraphine 瑟菈紛": {
-                "win_rate": 63.7,
-                "pick_rate": 9.2,
-                "ban_rate": 3.1,
-                "kda": "5.8 / 5.2 / 19.3",
-                "kda_ratio": "4.8",
-                "damage": "20,100",
-                "damage_percentage": "19%",
-                "healing": "22,300",
-                "healing_percentage": "59%",
-                "damage_taken": "17,500",
-                "damage_taken_percentage": "15%",
-                "trend_data": [59, 61, 62, 63, 64, 65]
-            },
-            "Ziggs 希格斯": {
-                "win_rate": 62.4,
-                "pick_rate": 11.7,
-                "ban_rate": 4.2,
-                "kda": "7.6 / 5.9 / 15.2",
-                "kda_ratio": "3.9",
-                "damage": "32,400",
-                "damage_percentage": "31%",
-                "healing": "0",
-                "healing_percentage": "0%",
-                "damage_taken": "18,900",
-                "damage_taken_percentage": "16%",
-                "trend_data": [58, 59, 60, 61, 62, 63]
-            },
-            "Ashe 艾希": {
-                "win_rate": 61.8,
-                "pick_rate": 14.5,
-                "ban_rate": 3.8,
-                "kda": "6.8 / 6.2 / 14.8",
-                "kda_ratio": "3.5",
-                "damage": "28,200",
-                "damage_percentage": "27%",
-                "healing": "0",
-                "healing_percentage": "0%",
-                "damage_taken": "19,300",
-                "damage_taken_percentage": "16%",
-                "trend_data": [57, 58, 59, 60, 61, 62]
-            }
-        }
-
-        # 為其他英雄創建默認數據
-        default_stats = {
-            "win_rate": 55.0,
-            "pick_rate": 7.0,
-            "ban_rate": 2.0,
-            "kda": "6.0 / 6.0 / 15.0",
-            "kda_ratio": "3.5",
-            "damage": "20,000",
-            "damage_percentage": "20%",
-            "healing": "8,000",
-            "healing_percentage": "25%",
-            "damage_taken": "18,000",
-            "damage_taken_percentage": "15%",
-            "trend_data": [54, 55, 55, 56, 56, 57]
-        }
-
-        return champion_stats.get(champion_name, default_stats)
-
-    def get_champion_recommendations(self, champion_name):
-        """獲取英雄推薦構建 (模擬數據)"""
-        recommendations = {
-            "Sona 索娜": {
-                "runes_win_rate": 68.7,
-                "primary_rune": "聚星",
-                "secondary_runes": ["法力環", "超然", "風暴聚集"],
-                "secondary_path": "啟迪",
-                "secondary_choices": ["餅乾配送", "宇宙洞悉"],
-                "shards": ["+8魔法攻擊", "+9適應之力", "+6護甲"],
-                "starting_items": ["S1", "S2"],
-                "core_items": ["C1", "C2", "C3", "C4"],
-                "optional_items": ["O1", "O2", "O3", "O4"],
-                "build_win_rate": 71.2,
-                "skill_order": "R > Q > W > E",
-                "first_skill": "Q",
-                "tips": [
-                    "• 盡可能地使用Q騷擾敵方英雄，尤其是在前期",
-                    "• 靈活使用W治療隊友，優先考慮生命值較低的隊友",
-                    "• 使用E進行團隊機動性增加，可以配合強大的進攻或撤退"
-                ]
-            },
-            "Seraphine 瑟菈紛": {
-                "runes_win_rate": 67.3,
-                "primary_rune": "奧術彗星",
-                "secondary_runes": ["法力環", "超然", "暴風驟雨"],
-                "secondary_path": "啟迪",
-                "secondary_choices": ["餅乾配送", "宇宙洞悉"],
-                "shards": ["+8魔法攻擊", "+9適應之力", "+6護甲"],
-                "starting_items": ["S1", "S2"],
-                "core_items": ["C1", "C2", "C3", "C4"],
-                "optional_items": ["O1", "O2", "O3", "O4"],
-                "build_win_rate": 69.8,
-                "skill_order": "R > Q > E > W",
-                "first_skill": "Q",
-                "tips": [
-                    "• 使用Q進行安全的線上消耗",
-                    "• 在團戰中儘量為多名隊友提供W的護盾和治療",
-                    "• 利用E的長距離打斷和控制敵方關鍵目標"
-                ]
-            }
-        }
-
-        # 為其他英雄創建默認推薦
-        default_recommendations = {
-            "runes_win_rate": 60.0,
-            "primary_rune": "征服者",
-            "secondary_runes": ["凱旋", "傳說：韌性", "致命一擊"],
-            "secondary_path": "精密",
-            "secondary_choices": ["飢餓獵手", "無情獵手"],
-            "shards": ["+9適應之力", "+9適應之力", "+6護甲"],
-            "starting_items": ["S1", "S2"],
-            "core_items": ["C1", "C2", "C3"],
-            "optional_items": ["O1", "O2", "O3", "O4"],
-            "build_win_rate": 62.5,
-            "skill_order": "R > Q > W > E",
-            "first_skill": "Q",
-            "tips": [
-                "• 保持與隊友的適當距離",
-                "• 合理利用技能，避免浪費能量",
-                "• 在團戰中注意站位，避免被敵方集火"
-            ]
-        }
-
-        return recommendations.get(champion_name, default_recommendations)
+    def _is_destroyed(self):
+        """檢查視窗是否已被銷毀"""
+        try:
+            return not self.winfo_exists()
+        except:
+            return True

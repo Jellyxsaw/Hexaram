@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import ttk, font
+from data_manager import DataManager
 
 import dataFetcher
 # 導入各界面模組
@@ -20,6 +21,7 @@ class ARAMAnalyzerApp:
         self.root.title("Hexaram")
         self.root.geometry("1200x800")
         self.fetcher = dataFetcher.DataFetcher()
+        self.data_manager = DataManager()
         self.load_champion_images()
 
         # 設置深色主題背景 - 調整為更接近設計圖的顏色
@@ -40,7 +42,7 @@ class ARAMAnalyzerApp:
         self.root.resizable(True, True)
 
         # 設置最小視窗大小
-        self.root.minsize(800, 600)
+        self.root.minsize(1656, 1024)
 
         # 載入自訂字體
         self.load_custom_fonts()
@@ -513,12 +515,7 @@ class ARAMAnalyzerApp:
         print(f"實時模式: {'開啟' if self.real_time_switch_var.get() else '關閉'}")
 
     def refresh_data(self):
-        """刷新資料"""
-        # TODO: 實現資料刷新邏輯
-        print("刷新資料")
-
-        # 刷新當前頁面
-        self.refresh_current_page()
+        self.data_manager.refresh_all_data(callback=self.refresh_current_page)
 
     def refresh_current_page(self):
         """刷新當前頁面"""
