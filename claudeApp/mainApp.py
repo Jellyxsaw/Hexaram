@@ -1,5 +1,8 @@
 import os
 import tkinter as tk
+import atexit
+import signal
+import sys
 from tkinter import ttk, font
 from data_manager import DataManager
 
@@ -14,16 +17,41 @@ from stats_analysis import StatsAnalysisFrame
 from team_comp import TeamCompFrame
 from teammate_stats import TeammateStatsFrame
 
+# 全局變量用於控制程序退出
+is_shutting_down = False
+
+def cleanup_resources():
+    """清理所有資源的函數"""
+    global is_shutting_down
+    is_shutting_down = True
+
+# 註冊清理函數
+atexit.register(cleanup_resources)
+
+# 註冊信號處理
+def signal_handler(signum, frame):
+    cleanup_resources()
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 class ARAMAnalyzerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Hexaram")
         self.root.geometry("1200x800")
+        
+        # 綁定窗口關閉事件
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
         self.fetcher = dataFetcher.DataFetcher()
         self.data_manager = DataManager()
+        
+        # 初始化圖片資源
+        self.champ_images = {}
         self.load_champion_images()
-
+        
         # 設置深色主題背景 - 調整為更接近設計圖的顏色
         self.bg_color = "#0f172a"  # 主背景色 - 更深的蓝色
         self.accent_color = "#e94560"  # 強調色 - 保持红色
@@ -472,7 +500,21 @@ class ARAMAnalyzerApp:
         print(f"實時模式: {'開啟' if self.real_time_switch_var.get() else '關閉'}")
 
     def refresh_data(self):
-        self.data_manager.refresh_all_data(callback=self.refresh_current_page)
+        """刷新数据"""
+        try:
+            # 获取实时数据
+            data = self.fetcher.fetch_live_data()
+            
+            # 如果无法获取实时数据，使用本地数据
+            if not data:
+                data = self.fetcher.load_local_data()
+                print("无法获取实时数据，已使用本地测试数据")
+            
+            if data:
+                # 更新当前页面
+                self.refresh_current_page()
+        except Exception as e:
+            print(f"数据刷新失败: {str(e)}")
 
     def refresh_current_page(self):
         """刷新當前頁面"""
@@ -734,6 +776,44 @@ class ARAMAnalyzerApp:
 
     def load_champion_images(self):
         load_champion_images(self)
+
+    def on_closing(self):
+        """處理窗口關閉事件"""
+        try:
+            # 設置關閉標誌
+            global is_shutting_down
+            is_shutting_down = True
+            
+            # 清理圖片資源
+            for img in self.champ_images.values():
+                if hasattr(img, 'close'):
+                    try:
+                        img.close()
+                    except:
+                        pass
+            
+            # 清理其他資源
+            if hasattr(self, 'fetcher'):
+                if hasattr(self.fetcher, 'close'):
+                    self.fetcher.close()
+            
+            if hasattr(self, 'data_manager'):
+                if hasattr(self.data_manager, 'close'):
+                    self.data_manager.close()
+            
+            # 銷毀所有子窗口
+            for widget in self.root.winfo_children():
+                if isinstance(widget, tk.Toplevel):
+                    widget.destroy()
+            
+            # 關閉主窗口
+            self.root.quit()
+            self.root.destroy()
+            
+        except Exception as e:
+            print(f"關閉程序時發生錯誤: {str(e)}")
+        finally:
+            sys.exit(0)
 
 
 # 主程式入口

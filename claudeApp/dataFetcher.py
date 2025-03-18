@@ -14,7 +14,7 @@ def get_resource_path(relative_path):
     if getattr(sys, 'frozen', False):
         base_path = sys._MEIPASS
     else:
-        base_path = os.path.abspath(".")
+        base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
 
@@ -24,9 +24,13 @@ try:
     with open(config_path, "r", encoding="utf-8") as f:
         YAML_CONFIG = yaml.safe_load(f)
 except Exception as e:
-    raise FileNotFoundError(f"無法讀取設定檔：{config_path}, 錯誤：{e}")
+    print(f"警告：無法讀取設定檔：{config_path}, 錯誤：{e}")
+    print("使用默認設定...")
+    YAML_CONFIG = {
+        "lockfile_path": "C:/Riot Games/League of Legends/lockfile"
+    }
 
-LOCKFILE_PATH = YAML_CONFIG.get("lockfile_path", "")
+LOCKFILE_PATH = YAML_CONFIG.get("lockfile_path", "C:/Riot Games/League of Legends/lockfile")
 
 
 class DataFetcher:
@@ -92,9 +96,9 @@ class DataFetcher:
         }
 
     def load_local_data(self):
-        LOCAL_TEST_DATA = 'local_session.json'
+        local_data_path = get_resource_path('local_session.json')
         try:
-            with open(LOCAL_TEST_DATA, 'r', encoding='utf-8') as f:
+            with open(local_data_path, 'r', encoding='utf-8') as f:
                 return self.parse_session_data(json.load(f))
         except Exception as e:
             print(f"本地數據加載失敗: {e}")
@@ -105,19 +109,23 @@ class DataFetcher:
 @lru_cache(maxsize=1)
 def get_champion_mappings():
     # 優先檢查本地 JSON 文件
-    json_files_exist = os.path.exists('champion_mapping.json') and os.path.exists('chinese_mapping.json')
-    if json_files_exist:
+    champ_mapping_path = get_resource_path('champion_mapping.json')
+    chinese_mapping_path = get_resource_path('chinese_mapping.json')
+    
+    if os.path.exists(champ_mapping_path) and os.path.exists(chinese_mapping_path):
         try:
-            with open('champion_mapping.json', 'r', encoding='utf-8') as f:
+            with open(champ_mapping_path, 'r', encoding='utf-8') as f:
                 champ_data = json.load(f)
                 id_to_en = {str(v['key']): k for k, v in champ_data.items()}
 
-            with open('chinese_mapping.json', 'r', encoding='utf-8') as f:
+            with open(chinese_mapping_path, 'r', encoding='utf-8') as f:
                 en_to_tw = json.load(f)
 
             return id_to_en, en_to_tw
         except Exception as e:
             print(f"本地JSON文件讀取失敗: {e}")
+            return {}, {}
+    return {}, {}
 
 
 def id_to_name(champion_id, id_mapping):

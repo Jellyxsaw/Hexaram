@@ -78,4 +78,51 @@ project/
 
 ---
 
+# Hexaram 打包說明
+
+## 打包步驟
+
+1. 確保已安裝所有依賴：
+```bash
+pip install -r requirements.txt
+```
+
+2. 準備資源文件：
+   - 在專案根目錄創建 `images` 文件夾
+   - 將應用程式圖標（.ico 格式）放入 `images` 文件夾，命名為 `icon.ico`
+   - 確保 `fonts` 文件夾中包含所需的字體文件
+   - 確保 `data` 文件夾中包含所需的數據文件
+
+3. 運行打包腳本：
+```bash
+python build.py
+```
+
+4. 打包完成後，可執行檔將位於 `dist` 目錄中。
+
+## 注意事項
+
+- 確保所有資源文件（字體、圖片、數據等）都已正確放置在對應的文件夾中
+- 打包過程可能需要幾分鐘時間
+- 生成的可執行檔可以在其他 Windows 電腦上運行，無需安裝 Python
+- 如果遇到問題，請檢查是否所有依賴都已正確安裝
+
+## 文件結構要求
+
+```
+Hexaram/
+├── claudeApp/
+│   └── mainApp.py
+├── images/
+│   └── icon.ico
+├── fonts/
+│   ├── NotoSansTC-Regular.ttf
+│   ├── NotoSansTC-Medium.ttf
+│   └── NotoSansTC-Bold.ttf
+├── data/
+│   └── (其他數據文件)
+├── build.py
+└── requirements.txt
+```
+
 
