@@ -3,7 +3,7 @@ import tkinter as tk
 import atexit
 import signal
 import sys
-from tkinter import ttk, font
+from tkinter import ttk, font, messagebox
 from data_manager import DataManager
 
 import dataFetcher
@@ -830,6 +830,13 @@ class ARAMAnalyzerApp:
             print(f"關閉程序時發生錯誤: {str(e)}")
         finally:
             sys.exit(0)
+
+    def update_data_fetcher(self, new_lockfile_path):
+        """更新 DataFetcher 實例的 lockfile 路徑"""
+        try:
+            self.fetcher = dataFetcher.DataFetcher(new_lockfile_path)
+        except Exception as e:
+            messagebox.showerror("錯誤", f"更新 DataFetcher 失敗：{str(e)}")
 
 
 # 主程式入口

@@ -1,16 +1,26 @@
 import json
 import os
+import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
 from rounded_widgets import RoundedFrame, RoundedButton
 
 
+def get_resource_path(relative_path):
+    # 如果被打包，sys._MEIPASS 會指向臨時目錄
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
+
 class SettingsFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="#1a1a2e")
         self.controller = controller
-        self.config_file = "config.json"
+        self.config_file = get_resource_path("config.json")
 
         # 設定初始值
         self.load_settings()
@@ -434,6 +444,10 @@ class SettingsFrame(tk.Frame):
             # 保存到文件
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, ensure_ascii=False, indent=4)
+
+            # 通知主程序更新 DataFetcher
+            if hasattr(self.controller, 'update_data_fetcher'):
+                self.controller.update_data_fetcher(self.lockfile_path.get())
 
             messagebox.showinfo("成功", "設定已保存")
             

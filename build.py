@@ -8,7 +8,7 @@ def build_app():
     
     # 定義需要包含的資源文件夾和文件
     resources = [
-        ('claudeApp/config.yml', '.'),  # 將配置文件放在根目錄
+        ('claudeApp/config.json', '.'),  # 將配置文件放在根目錄
         ('claudeApp/chinese_mapping.json', '.'),  # 將映射文件放在根目錄
         ('claudeApp/champion_mapping.json', '.'),
         ('claudeApp/local_session.json', '.'),

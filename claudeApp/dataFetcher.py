@@ -2,6 +2,8 @@ import base64
 import json
 import os
 import sys
+import tkinter as tk
+from tkinter import messagebox
 from functools import lru_cache
 
 import requests
@@ -18,19 +20,21 @@ def get_resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-# 載入 YAML 設定檔
-config_path = get_resource_path("config.yml")
+# 載入 JSON 設定檔
+config_path = get_resource_path("config.json")
 try:
     with open(config_path, "r", encoding="utf-8") as f:
-        YAML_CONFIG = yaml.safe_load(f)
+        JSON_CONFIG = json.load(f)
 except Exception as e:
-    print(f"警告：無法讀取設定檔：{config_path}, 錯誤：{e}")
-    print("使用默認設定...")
-    YAML_CONFIG = {
+    messagebox.showerror("設定檔錯誤", f"無法讀取設定檔：{config_path}\n錯誤：{e}\n\n將使用默認設定。")
+    JSON_CONFIG = {
         "lockfile_path": "C:/Riot Games/League of Legends/lockfile"
     }
 
-LOCKFILE_PATH = YAML_CONFIG.get("lockfile_path", "C:/Riot Games/League of Legends/lockfile")
+LOCKFILE_PATH = JSON_CONFIG.get("lockfile_path")
+if not LOCKFILE_PATH:
+    messagebox.showerror("設定檔錯誤", "設定檔中缺少 lockfile_path 設定。\n\n將使用默認路徑：C:/Riot Games/League of Legends/lockfile")
+    LOCKFILE_PATH = "C:/Riot Games/League of Legends/lockfile"
 
 
 class DataFetcher:
@@ -46,7 +50,7 @@ class DataFetcher:
             session = self.get_champ_select_session(lock_info)
             return self.parse_session_data(session) if session else None
         except Exception as e:
-            print(f"即時數據獲取失敗: {e}")
+            messagebox.showerror("數據獲取錯誤", f"無法獲取即時數據\n\n錯誤：{e}\n\n請確認：\n1. 英雄聯盟是否正在運行\n2. 是否正在進行英雄選擇\n3. Lockfile 路徑是否正確 目前的lockfile路徑為{self.lockfile_path}")
             return None
 
     def read_lockfile(self):
@@ -71,6 +75,7 @@ class DataFetcher:
             response = requests.get(url, headers=headers, verify=False, timeout=3)
             return response.json() if response.status_code == 200 else None
         except Exception as e:
+            messagebox.showerror("API 請求錯誤", f"無法連接到英雄聯盟客戶端 API\n\n錯誤：{e}\n\n請確認：\n1. 英雄聯盟是否正在運行\n2. 是否正在進行英雄選擇\n3. 客戶端是否正常運作")
             raise Exception(f"API請求失敗: {e}")
 
     def parse_session_data(self, session):
