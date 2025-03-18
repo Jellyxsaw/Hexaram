@@ -1,3 +1,4 @@
+
 # -*- mode: python ; coding: utf-8 -*-
 import time
 
@@ -11,7 +12,7 @@ a = Analysis(
     ['claudeApp/mainApp.py'],
     pathex=['C:\SideProject\Hexaram'],
     binaries=[],
-    datas=[('claudeApp/config.yml', '.'), ('claudeApp/chinese_mapping.json', '.'), ('claudeApp/champion_mapping.json', '.'), ('claudeApp/local_session.json', '.'), ('images', 'images'), ('data', 'data'), ('champion_images', 'champion_images')],
+    datas=[('claudeApp/config.json', '.'), ('claudeApp/chinese_mapping.json', '.'), ('claudeApp/champion_mapping.json', '.'), ('claudeApp/local_session.json', '.'), ('images', 'images'), ('data', 'data'), ('champion_images', 'champion_images')],
     hiddenimports=['atexit', 'signal', 'threading', 'PIL._tkinter_finder'],
     hookspath=[],
     hooksconfig={},
