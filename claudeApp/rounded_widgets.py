@@ -137,6 +137,7 @@ class RoundedButton(tk.Canvas):
 
         # 標記按鈕狀態
         self.active = False
+        self.selected = False  # 新增：選中狀態
 
         # 初始化繪製
         self._draw_button()
@@ -159,7 +160,11 @@ class RoundedButton(tk.Canvas):
             self.config(width=width, height=height)
 
         # 繪製背景
-        bg_color = self.highlight_color if self.active else self.bg_color
+        if self.selected:
+            bg_color = self.highlight_color  # 選中狀態使用高亮色
+        else:
+            bg_color = self.highlight_color if self.active else self.bg_color
+
         radius = min(self.radius, height // 2, width // 2)  # 確保圓角半徑不超過尺寸的一半
 
         # 創建圓角矩形
@@ -188,12 +193,14 @@ class RoundedButton(tk.Canvas):
             text=self.text, fill=self.fg_color, font=self.font, tags="text")
 
     def _on_enter(self, event):
-        self.active = True
-        self._draw_button()
+        if not self.selected:  # 只有在非選中狀態下才改變懸停效果
+            self.active = True
+            self._draw_button()
 
     def _on_leave(self, event):
-        self.active = False
-        self._draw_button()
+        if not self.selected:  # 只有在非選中狀態下才改變懸停效果
+            self.active = False
+            self._draw_button()
 
     def _on_press(self, event):
         # 點擊效果 - 可以添加更多視覺效果
@@ -225,6 +232,10 @@ class RoundedButton(tk.Canvas):
             self.padx = kwargs.pop("padx")
         if "pady" in kwargs:
             self.pady = kwargs.pop("pady")
+        if "selected" in kwargs:  # 新增：支持設置選中狀態
+            self.selected = kwargs.pop("selected")
+            if not self.selected:  # 當按鈕被取消選中時，重置 active 狀態
+                self.active = False
 
         super().configure(**kwargs)
         self._draw_button()
@@ -236,5 +247,7 @@ class RoundedButton(tk.Canvas):
             return self.bg_color
         elif key == "fg":
             return self.fg_color
+        elif key == "selected":  # 新增：支持獲取選中狀態
+            return self.selected
         else:
             return super().cget(key)

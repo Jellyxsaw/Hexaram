@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from api_client import AramAPIClient
+from rounded_widgets import RoundedFrame, RoundedButton
 
 # 設定日誌
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -65,16 +66,21 @@ class ChampionListFrame(tk.Frame):
         search_frame.pack(fill="x", padx=10, pady=10)
 
         # 搜索區域容器 - 使用圓角邊框
-        search_container = tk.Frame(search_frame, bg="#0f3460", bd=0, highlightthickness=1,
-                                    highlightbackground="#0f3460")
+        search_container = RoundedFrame(
+            search_frame,
+            bg_color="#1e293b",
+            corner_radius=10,
+            border_width=1,
+            border_color="#334155"
+        )
         search_container.pack(side="left", padx=10, pady=15)
 
         # 搜索圖標
         search_icon_label = tk.Label(
-            search_container,
+            search_container.interior,
             text="🔍",
-            bg="#0f3460",
-            fg="#8b8b8b",
+            bg="#1e293b",
+            fg="#94a3b8",
             font=("Arial", 10)
         )
         search_icon_label.pack(side="left", padx=(5, 0))
@@ -82,11 +88,11 @@ class ChampionListFrame(tk.Frame):
         # 搜索框
         self.search_var = tk.StringVar()
         self.search_entry = tk.Entry(
-            search_container,
+            search_container.interior,
             textvariable=self.search_var,
-            bg="#0f3460",
-            fg="#8b8b8b",
-            insertbackground="white",
+            bg="#1e293b",
+            fg="#94a3b8",
+            insertbackground="#94a3b8",
             relief="flat",
             font=("Arial", 10),
             width=30,
@@ -99,85 +105,73 @@ class ChampionListFrame(tk.Frame):
         def on_entry_click(event):
             if self.search_entry.get() == "搜索英雄...":
                 self.search_entry.delete(0, "end")
-                self.search_entry.config(fg="white")
-                search_icon_label.config(fg="white")
+                self.search_entry.config(fg="#e2e8f0")
+                search_icon_label.config(fg="#e2e8f0")
 
         def on_entry_leave(event):
             if self.search_entry.get() == "":
                 self.search_entry.insert(0, "搜索英雄...")
-                self.search_entry.config(fg="#8b8b8b")
-                search_icon_label.config(fg="#8b8b8b")
+                self.search_entry.config(fg="#94a3b8")
+                search_icon_label.config(fg="#94a3b8")
 
         self.search_entry.bind("<FocusIn>", on_entry_click)
         self.search_entry.bind("<FocusOut>", on_entry_leave)
         self.search_entry.bind("<Return>", lambda e: self.search_champions())
 
         # 搜索按鈕 - 使用更現代的設計
-        search_button = tk.Button(
+        search_button = RoundedButton(
             search_frame,
             text="搜尋",
+            command=self.search_champions,
+            radius=8,
             bg="#e94560",
             fg="white",
-            relief="flat",
-            font=("Arial", 10, "bold"),
-            padx=10,
-            pady=3,
-            bd=0,
-            command=self.search_champions
+            highlight_color="#e92550",
+            padx=15,
+            pady=5,
+            font=("Arial", 10, "bold")
         )
         search_button.pack(side="left", padx=5, pady=15)
 
-        # 增加懸停效果
-        def on_search_enter(e):
-            search_button.config(bg="#e92550")
-
-        def on_search_leave(e):
-            search_button.config(bg="#e94560")
-
-        search_button.bind("<Enter>", on_search_enter)
-        search_button.bind("<Leave>", on_search_leave)
-
         # 過濾按鈕 - 使用更現代的標籤設計
-        filter_frame = tk.Frame(search_frame, bg="#16213e")
+        filter_frame = RoundedFrame(
+            search_frame,
+            bg_color="#16213e",
+            corner_radius=10,
+            border_width=0
+        )
         filter_frame.pack(side="left", padx=(20, 5), pady=15)
 
         filter_options = ["全部", "坦克", "戰士", "刺客", "法師", "輔助", "射手"]
         self.filter_buttons = {}
 
         for i, option in enumerate(filter_options):
-            button = tk.Button(
-                filter_frame,
+            button = RoundedButton(
+                filter_frame.interior,
                 text=option,
+                command=lambda o=option: self.filter_champions(o),
+                radius=8,
                 bg="#0f3460" if i == 0 else "#1a1a2e",
                 fg="white",
-                relief="flat",
-                font=("Arial", 10),
-                padx=8,
-                pady=2,
-                bd=0,
-                command=lambda o=option: self.filter_champions(o)
+                highlight_color="#24365a",
+                padx=12,
+                pady=5,
+                font=("Arial", 10)
             )
             button.pack(side="left", padx=3)
             self.filter_buttons[option] = button
 
-            # 添加懸停效果
-            def on_filter_enter(e, btn=button):
-                if btn.cget("bg") != "#0f3460":  # 如果不是已選擇按鈕
-                    btn.config(bg="#24365a")
-
-            def on_filter_leave(e, btn=button, is_selected=(i == 0)):
-                if not is_selected:  # 如果不是已選擇按鈕
-                    btn.config(bg="#1a1a2e")
-
-            button.bind("<Enter>", lambda e, b=button: on_filter_enter(e, b))
-            button.bind("<Leave>", lambda e, b=button, sel=(i == 0): on_filter_leave(e, b, sel))
-
         # 排序選項
-        sort_frame = tk.Frame(search_frame, bg="#16213e")
+        sort_frame = RoundedFrame(
+            search_frame,
+            bg_color="#16213e",
+            corner_radius=10,
+            border_width=0
+        )
         sort_frame.pack(side="right", padx=10, pady=15)
 
         sort_label = tk.Label(
-            sort_frame,
+            sort_frame.interior,
             text="排序: ",
             bg="#16213e",
             fg="white",
@@ -197,7 +191,7 @@ class ChampionListFrame(tk.Frame):
                         relief="flat")
 
         sort_dropdown = ttk.Combobox(
-            sort_frame,
+            sort_frame.interior,
             textvariable=self.sort_var,
             values=["勝率", "選用率", "KDA"],
             width=8,
@@ -443,12 +437,12 @@ class ChampionListFrame(tk.Frame):
                             'championId': champ.get('champion_id', ''),
                             'name': champ.get('champion_name', ''),
                             'type': champ.get('champion_type', ''),
-                            'winRate': 0,  # 搜索結果沒有這些數據
-                            'pickRate': 0,
-                            'kda': '0/0/0',
-                            'kdaRatio': 0,
-                            'tier': '',
-                            'rank': 0,
+                            'winRate': round(champ.get('win_rate', 0), 1),
+                            'pickRate': round(champ.get('pick_rate', 0), 1),
+                            'kda': '0/0/0',  # 由于API没有返回具体KDA数据，保持默认值
+                            'kdaRatio': round(champ.get('kda_ratio', 0), 1),
+                            'tier': champ.get('tier', ''),
+                            'rank': champ.get('rank', 0),
                             'key': champ.get('key', 0),
                             'championTwName': champ.get('champion_tw_name', '')
                         })
@@ -623,189 +617,214 @@ class ChampionListFrame(tk.Frame):
             row: 行索引
             col: 列索引
         """
-        # 使用更現代的圓角卡片設計
-        card_frame = tk.Frame(self.grid_frame, bg="#16213e", width=280, height=180, bd=0, highlightthickness=1,
-                              highlightbackground="#0f3460")
+        # 定義新的配色方案 - 基於SVG設計檔案的配色
+        colors = {
+            "card_bg": "#16213e",  # 卡片背景色 (與SVG設計一致)
+            "card_border": "#0f3460",  # 邊框顏色 (與SVG深色區域一致)
+            "icon_bg": "#0f3460",  # 圖示背景 (與SVG頭像區域一致)
+            "stats_bg": "#0f3460",  # 統計資料區塊背景
+            "text_primary": "#ffffff",  # 主要文字顏色 (白色)
+            "text_secondary": "#8b8b8b",  # 次要文字顏色 (灰色)
+            "accent_blue": "#e94560",  # 強調色 (紅色)
+            "success": "#4ecca3",  # 成功顏色 (綠色)
+            "warning": "#ffd369",  # 警告顏色 (黃色)
+            "danger": "#fc5185",  # 危險顏色 (紫紅色)
+            "placeholder_bg": "#e94560"  # 預設圖示背景
+        }
+
+        # 使用 RoundedFrame 創建卡片
+        card_frame = RoundedFrame(
+            self.grid_frame,
+            bg_color=colors["card_bg"],
+            corner_radius=10,
+            border_width=1,
+            border_color=colors["card_border"]
+        )
         card_frame.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
         self.grid_frame.grid_rowconfigure(row, weight=1, uniform="row")
-        card_frame.pack_propagate(False)  # 防止框架自動調整大小
+        card_frame.interior.configure(width=280, height=180)
+        card_frame.interior.pack_propagate(False)
 
-        # 儲存原始卡片引用，以便之後可以引用它
+        # 儲存原始卡片引用
         self.champion_cards.append(card_frame)
 
-        # 為卡片添加懸停效果
-        def on_enter(e):
-            card_frame.config(highlightbackground="#e94560", highlightthickness=2)
-
-        def on_leave(e):
-            card_frame.config(highlightbackground="#0f3460", highlightthickness=1)
-
-        card_frame.bind("<Enter>", on_enter)
-        card_frame.bind("<Leave>", on_leave)
-
         # 英雄圖示框架 - 使用圓形設計
-        icon_frame = tk.Frame(card_frame, bg="#0f3460", width=60, height=60, bd=0)
+        icon_frame = RoundedFrame(
+            card_frame.interior,
+            bg_color=colors["icon_bg"],
+            corner_radius=30,
+            border_width=0
+        )
         icon_frame.place(x=20, y=20)
+        icon_frame.interior.configure(width=60, height=60)
+        icon_frame.interior.pack_propagate(False)
 
         # 嘗試載入英雄圖示
         champion_id = champion.get('championId', '')
         champion_key = champion.get('key', 0)
         icon_loaded = False
 
-        # 檢查控制器是否有champ_images屬性和對應的圖片
         if hasattr(self.controller, 'champ_images'):
-            # 優先使用championId查找
             if champion_id in self.controller.champ_images:
                 icon = self.controller.champ_images[champion_id]
-                icon_label = tk.Label(icon_frame, image=icon, bg="#0f3460", bd=0)
+                icon_label = tk.Label(icon_frame.interior, image=icon, bg=colors["icon_bg"], bd=0)
                 icon_label.place(relx=0.5, rely=0.5, anchor="center")
                 icon_loaded = True
-            # 然後嘗試使用key查找
             elif str(champion_key) in self.controller.champ_images:
                 icon = self.controller.champ_images[str(champion_key)]
-                icon_label = tk.Label(icon_frame, image=icon, bg="#0f3460", bd=0)
+                icon_label = tk.Label(icon_frame.interior, image=icon, bg=colors["icon_bg"], bd=0)
                 icon_label.place(relx=0.5, rely=0.5, anchor="center")
                 icon_loaded = True
 
-        # 如果沒有找到圖片，顯示佔位符
         if not icon_loaded:
-            placeholder = tk.Label(icon_frame, text=champion.get('name', '')[:1],
-                                   bg="#e94560", fg="white", font=("Arial", 18, "bold"),
-                                   width=3, height=1)
+            placeholder = tk.Label(
+                icon_frame.interior,
+                text=champion.get('name', '')[:1],
+                bg=colors["placeholder_bg"],
+                fg=colors["text_primary"],
+                font=("Microsoft JhengHei", 18, "bold"),
+                width=3,
+                height=1
+            )
             placeholder.place(relx=0.5, rely=0.5, anchor="center")
 
-        # 英雄名稱 - 使用更好的字體樣式
-        # 組合英文名稱和中文名稱（如果有）
+        # 英雄名稱區域
         name_text = champion.get('name', '')
         if 'championTwName' in champion and champion['championTwName']:
             name_text = f"{name_text} {champion['championTwName']}"
 
         name_label = tk.Label(
-            card_frame,
+            card_frame.interior,
             text=name_text,
-            bg="#16213e",
-            fg="white",
-            font=("Arial", 12, "bold"),
+            bg=colors["card_bg"],
+            fg=colors["text_primary"],
+            font=("Microsoft JhengHei", 12, "bold"),
             anchor="w"
         )
-        name_label.place(x=90, y=20)
+        name_label.place(x=90, y=25)
 
-        # 英雄類型 - 使用標籤樣式
+        # 英雄類型標籤
         type_text = champion.get('type', '')
-        type_frame = tk.Frame(card_frame, bg="#e94560", bd=0)
-        type_frame.place(x=90, y=45)
-
         type_label = tk.Label(
-            type_frame,
+            card_frame.interior,
             text=type_text,
-            bg="#e94560",
-            fg="white",
-            font=("Arial", 9),
-            anchor="center",
-            padx=5,
-            pady=1
+            bg=colors["card_bg"],
+            fg=colors["text_secondary"],
+            font=("Microsoft JhengHei", 9),
+            anchor="w"
         )
-        type_label.pack()
+        type_label.place(x=90, y=50)
 
-        # 統計資料框 - 改進設計
-        stats_frame = tk.Frame(card_frame, bg="#0f3460", width=220, height=80)
-        stats_frame.place(x=30, y=80)
+        # 統計資料框架
+        stats_frame = RoundedFrame(
+            card_frame.interior,
+            bg_color=colors["stats_bg"],
+            corner_radius=5,
+            border_width=0
+        )
+        stats_frame.place(x=20, y=90, width=240, height=80)
 
-        # 勝率 - 添加對勝率優劣的視覺提示
+        # 勝率行
         win_rate_value = champion.get('winRate', 0)
-        win_rate_color = "#4ecca3" if win_rate_value >= 50 else "#e94560"
+        win_rate_color = colors["success"] if win_rate_value >= 50 else colors["danger"]
 
-        win_rate_label1 = tk.Label(
-            stats_frame,
+        win_rate_label = tk.Label(
+            stats_frame.interior,
             text="勝率:",
-            bg="#0f3460",
-            fg="white",
-            font=("Arial", 10),
+            bg=colors["stats_bg"],
+            fg=colors["text_primary"],
+            font=("Microsoft JhengHei", 9),
             anchor="w"
         )
-        win_rate_label1.place(x=10, y=10)
+        win_rate_label.place(x=10, y=10)
 
-        win_rate_label2 = tk.Label(
-            stats_frame,
+        win_rate_value_label = tk.Label(
+            stats_frame.interior,
             text=f"{win_rate_value}%",
-            bg="#0f3460",
+            bg=colors["stats_bg"],
             fg=win_rate_color,
-            font=("Arial", 10, "bold"),
+            font=("Microsoft JhengHei", 11, "bold"),
             anchor="w"
         )
-        win_rate_label2.place(x=90, y=10)
+        win_rate_value_label.place(x=80, y=10)
 
-        # 選用率
-        pick_rate_label2 = tk.Label(
-            stats_frame,
+        # 選用率行
+        pick_rate_label = tk.Label(
+            stats_frame.interior,
+            text="選用率:",
+            bg=colors["stats_bg"],
+            fg=colors["text_primary"],
+            font=("Microsoft JhengHei", 9),
+            anchor="w"
+        )
+        pick_rate_label.place(x=10, y=35)
+
+        pick_rate_value = tk.Label(
+            stats_frame.interior,
             text=f"{champion.get('pickRate', 0)}%",
-            bg="#0f3460",
-            fg="white",
-            font=("Arial", 10),
+            bg=colors["stats_bg"],
+            fg=colors["text_primary"],
+            font=("Microsoft JhengHei", 10),
             anchor="w"
         )
-        pick_rate_label2.place(x=90, y=30)
+        pick_rate_value.place(x=80, y=35)
 
-        # KDA
-        kda_label1 = tk.Label(
-            stats_frame,
+        # KDA行
+        kda_label = tk.Label(
+            stats_frame.interior,
             text="KDA:",
-            bg="#0f3460",
-            fg="white",
-            font=("Arial", 10),
+            bg=colors["stats_bg"],
+            fg=colors["text_primary"],
+            font=("Microsoft JhengHei", 9),
             anchor="w"
         )
-        kda_label1.place(x=10, y=50)
+        kda_label.place(x=10, y=60)
 
-        kda_label2 = tk.Label(
-            stats_frame,
-            text=champion.get("kda", "0/0/0"),
-            bg="#0f3460",
-            fg="white",
-            font=("Arial", 10),
-            anchor="w"
-        )
-        kda_label2.place(x=90, y=50)
-
-        # KDA比 - 使用顏色指示優劣
+        # KDA數值
         kda_ratio = champion.get("kdaRatio", 0)
-        kda_color = "#4ecca3" if kda_ratio >= 2.5 else ("#e9d362" if kda_ratio >= 1.5 else "#e94560")
+        kda_color = colors["success"] if kda_ratio >= 3.0 else (
+            colors["warning"] if kda_ratio >= 2.0 else colors["danger"])
 
-        kda_ratio_label = tk.Label(
-            stats_frame,
-            text=str(kda_ratio),
-            bg="#0f3460",
+        kda_value = tk.Label(
+            stats_frame.interior,
+            text=f"{kda_ratio}",
+            bg=colors["stats_bg"],
             fg=kda_color,
-            font=("Arial", 10, "bold"),
-            anchor="e"
+            font=("Microsoft JhengHei", 10, "bold"),
+            anchor="w"
         )
-        kda_ratio_label.place(x=190, y=50)
+        kda_value.place(x=80, y=60)
 
-        # 點擊英雄卡片時的事件
-        champion_id = champion.get('championId', '')
+        # 互動效果
+        def on_enter(e):
+            card_frame.configure(border_color=colors["accent_blue"], border_width=2)
 
-        def open_champion_detail(event=None):
+        def on_leave(e):
+            card_frame.configure(border_color=colors["card_border"], border_width=1)
+
+        def on_click(e):
+            card_frame.configure(border_color="#FFFFFF", border_width=2)
+            self.after(100, lambda: card_frame.configure(border_color=colors["card_border"], border_width=1))
+            # 開啟英雄詳情
             if champion_id:
                 self.controller.show_champion_detail(champion_id)
 
-        # 添加點擊效果
-        def on_click(e):
-            card_frame.config(highlightbackground="#4ecca3", highlightthickness=2)
-            self.after(100, lambda: card_frame.config(highlightbackground="#e94560", highlightthickness=2))
-            open_champion_detail()
+        # 為所有元素添加交互事件
+        for widget in [card_frame.interior, name_label, type_label, stats_frame.interior,
+                       win_rate_label, win_rate_value_label, pick_rate_label, pick_rate_value,
+                       kda_label, kda_value]:
+            widget.bind("<Enter>", on_enter)
+            widget.bind("<Leave>", on_leave)
+            widget.bind("<Button-1>", on_click)
 
-        # 為所有元素添加點擊事件
-        card_frame.bind("<Button-1>", on_click)
-        name_label.bind("<Button-1>", on_click)
-        stats_frame.bind("<Button-1>", on_click)
         if 'icon_label' in locals():
             icon_label.bind("<Button-1>", on_click)
+            icon_label.bind("<Enter>", on_enter)
+            icon_label.bind("<Leave>", on_leave)
         if 'placeholder' in locals():
             placeholder.bind("<Button-1>", on_click)
-        if 'type_label' in locals():
-            type_label.bind("<Button-1>", on_click)
-        if 'type_frame' in locals():
-            type_frame.bind("<Button-1>", on_click)
+            placeholder.bind("<Enter>", on_enter)
+            placeholder.bind("<Leave>", on_leave)
 
     def search_champions(self, event=None):
         """根據搜索框內容搜索英雄"""

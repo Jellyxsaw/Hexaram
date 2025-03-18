@@ -25,15 +25,16 @@ class ARAMAnalyzerApp:
         self.load_champion_images()
 
         # 設置深色主題背景 - 調整為更接近設計圖的顏色
-        self.bg_color = "#1a1a2e"  # 主背景色
-        self.accent_color = "#e94560"  # 強調色 - 改為紅色調
+        self.bg_color = "#0f172a"  # 主背景色 - 更深的蓝色
+        self.accent_color = "#e94560"  # 強調色 - 保持红色
         self.text_color = "#FFFFFF"  # 文字顏色
-        self.highlight_color = "#e94560"  # 高亮色 - 與強調色一致
-        self.secondary_bg = "#16213e"  # 次要背景色
-        self.nav_bg = "#16213e"  # 導航欄背景色
-        self.content_area_bg = "#0f3460"  # 內容區域背景色
-        self.button_bg = "#0f3460"  # 按鈕背景色
-        self.alternate_row_bg = "#0c2b52"  # 表格交替行背景色
+        self.highlight_color = "#e94560"  # 高亮色 - 与强调色一致
+        self.secondary_bg = "#1e293b"  # 次要背景色 - 更深的蓝灰色
+        self.nav_bg = "#1e293b"  # 导航栏背景色
+        self.content_area_bg = "#0f172a"  # 内容区域背景色
+        self.button_bg = "#1e293b"  # 按钮背景色
+        self.alternate_row_bg = "#0f172a"  # 表格交替行背景色
+        self.hover_color = "#334155"  # 悬停颜色
 
         # 設定圓角半徑
         self.corner_radius = 10  # 全局圓角半徑設定
@@ -187,11 +188,11 @@ class ARAMAnalyzerApp:
         style.theme_use('clam')  # 使用clam主題作為基礎
 
         # 設置字體大小
-        title_size = 16  # 增加標題字體大小
-        nav_size = 12
-        label_size = 10
-        button_size = 10
-        entry_size = 10
+        title_size = 18  # 增加標題字體大小
+        nav_size = 14
+        label_size = 12
+        button_size = 12
+        entry_size = 12
 
         # === 全局設定默認字體 ===
         # 設定所有可能使用的控件類型的默認字體
@@ -207,7 +208,10 @@ class ARAMAnalyzerApp:
             style.configure(widget, font=(self.font_family, label_size))
 
         # 為樹狀視圖標題設定字體
-        style.configure("Treeview.Heading", font=(self.font_family_bold, label_size))
+        style.configure("Treeview.Heading", 
+                       background=self.secondary_bg,
+                       foreground=self.text_color,
+                       font=(self.font_family_bold, label_size))
 
         # 為文本標籤設定默認樣式
         style.configure(
@@ -221,19 +225,26 @@ class ARAMAnalyzerApp:
         style.configure(
             "TButton",
             font=(self.font_family, button_size),
-            padding=(8, 4)
+            padding=(12, 6),
+            background=self.button_bg,
+            foreground=self.text_color
         )
 
         # 為輸入框設定默認樣式
         style.configure(
             "TEntry",
-            font=(self.font_family, entry_size)
+            font=(self.font_family, entry_size),
+            fieldbackground=self.secondary_bg,
+            foreground=self.text_color
         )
 
         # 為下拉菜單設定默認樣式
         style.configure(
             "TCombobox",
-            font=(self.font_family, entry_size)
+            font=(self.font_family, entry_size),
+            background=self.secondary_bg,
+            foreground=self.text_color,
+            fieldbackground=self.secondary_bg
         )
 
         # ===== 特定樣式設定 =====
@@ -371,6 +382,9 @@ class ARAMAnalyzerApp:
 
     def create_nav_bar(self):
         """創建頂部導航欄"""
+        # 定義導航欄字體大小
+        nav_size = 14  # 导航栏字体大小
+
         # 導航欄框架 - 增加高度以符合設計
         nav_bar = RoundedFrame(
             self.main_frame,
@@ -378,7 +392,7 @@ class ARAMAnalyzerApp:
             corner_radius=0,  # 只圓角底部
             border_width=0
         )
-        nav_bar.interior.configure(height=60)
+        nav_bar.interior.configure(height=70)  # 增加导航栏高度
         nav_bar.pack(fill="x", side="top", padx=0, pady=0)
 
         # 添加一個細線作為分隔
@@ -387,14 +401,14 @@ class ARAMAnalyzerApp:
 
         # 應用程式標題 (使用圖標和標題組合)
         title_frame = tk.Frame(nav_bar.interior, bg=self.nav_bg)
-        title_frame.pack(side="left", padx=(20, 30), pady=12)  # 調整上下間距
+        title_frame.pack(side="left", padx=(30, 40), pady=15)  # 调整左右间距
 
         title_label = tk.Label(
             title_frame,
             text="Hexaram",
             bg=self.nav_bg,
             fg=self.highlight_color,
-            font=(self.font_family_bold, 18)  # 增加字體大小
+            font=(self.font_family_bold, 24)  # 增加字体大小
         )
         title_label.pack(side="left")
 
@@ -403,111 +417,54 @@ class ARAMAnalyzerApp:
         nav_frame = tk.Frame(nav_bar.interior, bg=self.nav_bg)
         nav_frame.pack(side="left", fill="y")
 
-        # 創建導航按鈕 - 使用圓角按鈕
-        nav_options = [
-            ("team_comp", "陣容推薦", self.show_team_comp),
-            ("champ_list", "數據分析", self.show_champion_list),
-            ("teammates", "隊友戰績", self.show_teammate_stats),
-            ("settings", "設定", self.show_settings),
+        # 定義導航按鈕樣式
+        nav_button_style = {
+            "font": (self.font_family, nav_size),
+            "padx": 20,
+            "pady": 8,
+            "radius": 8,
+            "bg": self.nav_bg,
+            "fg": self.text_color,
+            "highlight_color": self.highlight_color
+        }
+
+        # 創建導航按鈕
+        nav_items = [
+            ("陣容推薦", self.show_team_comp),
+            ("英雄列表", self.show_champion_list),
+            ("隊友數據", self.show_teammate_stats),
+            ("數據分析", self.show_stats_analysis),
+            ("設定", self.show_settings)
         ]
 
-        for i, (key, text, command) in enumerate(nav_options):
-            # 創建圓角按鈕
-            button = RoundedButton(
+        for text, command in nav_items:
+            btn = RoundedButton(
                 nav_frame,
                 text=text,
-                bg=self.button_bg if i == 0 else self.nav_bg,
-                fg=self.text_color,
-                highlight_color=self.highlight_color,
                 command=command,
-                font=(self.font_family, 12),
-                radius=self.corner_radius,
-                padx=15,
-                pady=5,
-                width=100,
-                height=30
+                **nav_button_style
             )
-            button.pack(side="left", padx=5, pady=5)
+            btn.pack(side="left", padx=5)
+            self.nav_buttons[text] = btn
 
-            # 存儲按鈕引用
-            self.nav_buttons[key] = button
+        # 添加右側工具欄
+        tools_frame = tk.Frame(nav_bar.interior, bg=self.nav_bg)
+        tools_frame.pack(side="right", padx=20, pady=10)
 
-        # 實時模式切換區域
-        real_time_frame = tk.Frame(nav_bar.interior, bg=self.nav_bg)
-        real_time_frame.pack(side="right", padx=10)
-
-        real_time_label = tk.Label(
-            real_time_frame,
-            text="實時模式",
-            bg=self.nav_bg,
-            fg=self.text_color,
-            font=(self.font_family, 12)  # 增加字體大小
-        )
-        real_time_label.pack(side="left", padx=5)
-
-        # 修正後的實時模式切換開關 - 使用更簡單的設計
-        switch_frame = RoundedFrame(
-            real_time_frame,
-            bg_color=self.nav_bg,
-            corner_radius=self.corner_radius,
-            border_width=0
-        )
-        switch_frame.pack(side="left")
-
-        # 創建更簡單的切換開關背景
-        switch_bg = tk.Canvas(switch_frame.interior, width=50, height=20, bg=self.nav_bg,
-                              highlightthickness=0, bd=0)
-        switch_bg.pack(side="left")
-
-        # 使用圓角模擬方法 - 用兩個矩形和兩個圓形來模擬圓角矩形
-        # 繪製背景矩形
-        switch_bg.create_rectangle(10, 0, 40, 20, fill=self.accent_color, outline="", width=0, tags="switch_bg")
-        # 繪製左側圓形
-        switch_bg.create_oval(0, 0, 20, 20, fill=self.accent_color, outline="", tags="switch_bg_left")
-        # 繪製右側圓形
-        switch_bg.create_oval(30, 0, 50, 20, fill=self.accent_color, outline="", tags="switch_bg_right")
-
-        # 繪製開關指示器 (圓形)
-        switch_indicator = switch_bg.create_oval(30, 0, 50, 20, fill="white", tags="switch_indicator")
-
-        self.real_time_switch_var = tk.BooleanVar(value=True)
-
-        # 切換開關的點擊事件
-        def toggle_switch():
-            self.real_time_switch_var.set(not self.real_time_switch_var.get())
-            if self.real_time_switch_var.get():
-                # 開啟狀態 - 移動指示器到右側
-                switch_bg.coords("switch_indicator", 30, 0, 50, 20)
-                switch_bg.itemconfig("switch_bg", fill=self.accent_color)
-                switch_bg.itemconfig("switch_bg_left", fill=self.accent_color)
-                switch_bg.itemconfig("switch_bg_right", fill=self.accent_color)
-            else:
-                # 關閉狀態 - 移動指示器到左側
-                switch_bg.coords("switch_indicator", 0, 0, 20, 20)
-                # 灰色背景
-                gray_color = "#666666"
-                switch_bg.itemconfig("switch_bg", fill=gray_color)
-                switch_bg.itemconfig("switch_bg_left", fill=gray_color)
-                switch_bg.itemconfig("switch_bg_right", fill=gray_color)
-            self.toggle_real_time()
-
-        # 綁定點擊事件
-        switch_bg.bind("<Button-1>", lambda e: toggle_switch())
-
-        # 立即刷新按鈕 - 使用圓角設計
-        refresh_button = RoundedButton(
-            nav_bar.interior,
-            text="立即刷新",
+        # 刷新按鈕
+        refresh_btn = RoundedButton(
+            tools_frame,
+            text="刷新",
+            command=self.refresh_data,
+            font=(self.font_family, nav_size),
+            padx=15,
+            pady=5,
+            radius=8,
             bg=self.button_bg,
             fg=self.text_color,
-            highlight_color=self.highlight_color,
-            command=self.refresh_data,
-            font=(self.font_family, 12),
-            radius=self.corner_radius,
-            padx=15,
-            pady=5
+            highlight_color=self.highlight_color
         )
-        refresh_button.pack(side="right", padx=20, pady=15)
+        refresh_btn.pack(side="right", padx=5)
 
     def toggle_real_time(self):
         """切換實時模式"""
@@ -541,9 +498,9 @@ class ARAMAnalyzerApp:
         """更新導航按鈕樣式"""
         for button_name, button in self.nav_buttons.items():
             if button_name == active_button:
-                button.configure(bg=self.button_bg)
+                button.configure(selected=True)  # 設置選中狀態
             else:
-                button.configure(bg=self.nav_bg)
+                button.configure(selected=False)  # 取消選中狀態
 
     def clear_content(self):
         """清除內容區域"""
@@ -583,7 +540,7 @@ class ARAMAnalyzerApp:
 
     def show_champion_list(self, refresh=False):
         """顯示英雄列表"""
-        self.update_nav_buttons("champ_list")
+        self.update_nav_buttons("英雄列表")
         self.clear_content()
 
         # 建立圓角容器
@@ -604,7 +561,7 @@ class ARAMAnalyzerApp:
 
     def show_team_comp(self, refresh=False):
         """顯示陣容推薦頁面"""
-        self.update_nav_buttons("team_comp")
+        self.update_nav_buttons("陣容推薦")
         self.clear_content()
 
         # 建立圓角容器
@@ -692,7 +649,7 @@ class ARAMAnalyzerApp:
 
     def show_stats_analysis(self, refresh=False):
         """顯示數據分析頁面"""
-        self.update_nav_buttons("champ_list")
+        self.update_nav_buttons("數據分析")
         self.clear_content()
 
         # 建立圓角容器
@@ -713,7 +670,7 @@ class ARAMAnalyzerApp:
 
     def show_teammate_stats(self, refresh=False):
         """顯示隊友戰績頁面"""
-        self.update_nav_buttons("teammates")
+        self.update_nav_buttons("隊友數據")
         self.clear_content()
 
         # 建立圓角容器
@@ -734,7 +691,7 @@ class ARAMAnalyzerApp:
 
     def show_settings(self, refresh=False):
         """顯示設定頁面"""
-        self.update_nav_buttons("settings")
+        self.update_nav_buttons("設定")
         self.clear_content()
 
         # 建立圓角容器

@@ -1282,18 +1282,38 @@ def search_champions():
 
     # 構建搜索查詢
     query = """
-        SELECT c.champion_id, c.champion_name, c.champion_tw_name, c.champion_type, c.key
+        SELECT 
+            c.champion_id, 
+            c.champion_name, 
+            c.champion_tw_name, 
+            c.champion_type, 
+            c.key,
+            s.win_rate,
+            s.pick_rate,
+            s.kda_ratio,
+            s.tier,
+            s.rank
         FROM champions c
-        WHERE c.champion_id ILIKE %(query)s
-           OR c.champion_name ILIKE %(query)s
-           OR c.champion_tw_name ILIKE %(query)s
+        LEFT JOIN champion_stats s ON c.champion_id = s.champion_id
+        WHERE 
+            LOWER(c.champion_id) LIKE LOWER(%(query)s)
+            OR LOWER(c.champion_name) LIKE LOWER(%(query)s)
+            OR LOWER(c.champion_tw_name) LIKE LOWER(%(query)s)
+            OR LOWER(c.champion_type) LIKE LOWER(%(query)s)
         ORDER BY 
             CASE 
-                WHEN c.champion_id ILIKE %(exact)s THEN 1
-                WHEN c.champion_name ILIKE %(exact)s THEN 1
-                WHEN c.champion_tw_name ILIKE %(exact)s THEN 1
-                ELSE 2
+                WHEN LOWER(c.champion_id) = LOWER(%(exact)s) THEN 1
+                WHEN LOWER(c.champion_name) = LOWER(%(exact)s) THEN 1
+                WHEN LOWER(c.champion_tw_name) = LOWER(%(exact)s) THEN 1
+                WHEN LOWER(c.champion_id) LIKE LOWER(%(query)s) THEN 2
+                WHEN LOWER(c.champion_name) LIKE LOWER(%(query)s) THEN 2
+                WHEN LOWER(c.champion_tw_name) LIKE LOWER(%(query)s) THEN 2
+                ELSE 3
             END,
+            CASE 
+                WHEN s.win_rate IS NOT NULL THEN s.win_rate
+                ELSE 0
+            END DESC,
             length(c.champion_id)
         LIMIT 10
     """
@@ -1305,8 +1325,24 @@ def search_champions():
 
     champions = execute_query(query, params)
 
+    # 格式化返回結果
+    formatted_results = []
+    for champ in champions:
+        formatted_results.append({
+            'champion_id': champ['champion_id'],
+            'champion_name': champ['champion_name'],
+            'champion_tw_name': champ['champion_tw_name'],
+            'champion_type': champ['champion_type'],
+            'key': champ['key'],
+            'win_rate': round(champ['win_rate'], 1) if champ['win_rate'] is not None else 0,
+            'pick_rate': round(champ['pick_rate'], 1) if champ['pick_rate'] is not None else 0,
+            'kda_ratio': round(champ['kda_ratio'], 1) if champ['kda_ratio'] is not None else 0,
+            'tier': champ['tier'] if champ['tier'] is not None else '',
+            'rank': champ['rank'] if champ['rank'] is not None else 0
+        })
+
     return jsonify({
-        "results": champions
+        "results": formatted_results
     })
 
 
