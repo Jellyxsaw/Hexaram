@@ -221,34 +221,38 @@ def format_champion_detail(stats, trends, runes, builds, matchups, synergies):
     # 格式化符文資料
     formatted_runes = []
     for rune in runes:
-        # 解析符文ID為名稱 (實際應用中需要符文映射表)
-        primary_path = rune['primary_path']
-        primary_rune = rune['primary_rune']
-        secondary_path = rune['secondary_path']
-
+        # 解析符文ID
         rune_options = json.loads(rune['rune_options'])
-        secondary_runes = []
-        for i, rune_id in enumerate(rune_options):
-            if i > 0 and i < 4:  # 假設索引1-3是主系的次要符文
-                secondary_runes.append(str(rune_id))
-
-        secondary_choices = []
-        for i, rune_id in enumerate(rune_options):
-            if i > 3:  # 假設索引4以後是副系符文
-                secondary_choices.append(str(rune_id))
-
-        # 解析符文碎片
         shard_options = json.loads(rune['shard_options'])
-        shards = [str(shard) for shard in shard_options]
+
+        # 主系符文ID
+        primary_path_id = rune_options[0]  # 第一個是主系ID
+        primary_rune_id = rune_options[1]  # 第二個是主系核心符文ID
+
+        # 次要符文ID (索引1-3是主系的次要符文)
+        secondary_rune_ids = rune_options[2:4]
+        
+        # 副系符文ID
+        secondary_path_id = rune_options[4]  # 第五個是副系ID
+        secondary_choice_ids = rune_options[5:7]  # 第六和第七個是副系選擇的符文ID
+
+        # 符文碎片ID
+        shard_ids = shard_options
 
         formatted_runes.append({
             "runes_win_rate": round(rune['win_rate'], 1),
-            "primary_path": primary_path,
-            "primary_rune": primary_rune,
-            "secondary_runes": secondary_runes,
-            "secondary_path": secondary_path,
-            "secondary_choices": secondary_choices,
-            "shards": shards,
+            "primary_path": rune['primary_path'],
+            "primary_path_id": primary_path_id,
+            "primary_rune": rune['primary_rune'],
+            "primary_rune_id": primary_rune_id,
+            "secondary_runes": [],  # 名稱列表
+            "secondary_rune_ids": secondary_rune_ids,  # ID列表
+            "secondary_path": rune['secondary_path'],
+            "secondary_path_id": secondary_path_id,
+            "secondary_choices": [],  # 名稱列表
+            "secondary_choice_ids": secondary_choice_ids,  # ID列表
+            "shards": [],  # 名稱列表
+            "shard_ids": shard_ids,  # ID列表
             "pick_rate": round(rune['pick_rate'], 1),
             "sample_size": rune['sample_size']
         })
@@ -259,12 +263,14 @@ def format_champion_detail(stats, trends, runes, builds, matchups, synergies):
         starting_items = json.loads(build['starting_items'])
         core_items = json.loads(build['core_items'])
         optional_items = json.loads(build['optional_items'])
+        item_win_rates = json.loads(build['item_win_rates']) if build.get('item_win_rates') else {}
 
         formatted_builds.append({
             "build_win_rate": round(build['win_rate'], 1),
             "starting_items": starting_items,
             "core_items": core_items,
             "optional_items": optional_items,
+            "item_win_rates": item_win_rates,
             "pick_rate": round(build['pick_rate'], 1),
             "sample_size": build['sample_size']
         })
@@ -293,8 +299,7 @@ def format_champion_detail(stats, trends, runes, builds, matchups, synergies):
     formatted_synergies = []
     for synergy in synergies:
         formatted_synergies.append({
-            "champion_id": synergy['champion1_id'] if synergy['champion2_id'] == champion_id else synergy[
-                'champion2_id'],
+            "champion_id": synergy['champion1_id'] if synergy['champion2_id'] == champion_id else synergy['champion2_id'],
             "win_rate": round(synergy['win_rate'], 1),
             "synergy_score": round(synergy['synergy_score'], 1),
             "sample_size": synergy['sample_size']
@@ -960,55 +965,7 @@ def get_synergy_matrix():
               description: 錯誤訊息
               example: "找不到英雄資料"
     """
-    limit = int(request.args.get('limit', 20))
-
-    # 獲取熱門英雄
-    query = """
-        SELECT champion_id
-        FROM champion_stats
-        ORDER BY pick_rate DESC
-        LIMIT %(limit)s
-    """
-    top_champions = execute_query(query, {"limit": limit})
-
-    if not top_champions:
-        return jsonify({"error": "找不到英雄資料"}), 404
-
-    champion_ids = [champ['champion_id'] for champ in top_champions]
-
-    # 獲取這些英雄之間的協同關係
-    synergy_matrix = []
-
-    for i, champ1 in enumerate(champion_ids):
-        row = []
-        for j, champ2 in enumerate(champion_ids):
-            if i == j:  # 同一英雄，無協同資料
-                row.append(0)
-            else:
-                # 確保排序一致
-                if champ1 > champ2:
-                    champion1, champion2 = champ2, champ1
-                else:
-                    champion1, champion2 = champ1, champ2
-
-                query = """
-                    SELECT synergy_score
-                    FROM team_synergies
-                    WHERE champion1_id = %(champion1)s AND champion2_id = %(champion2)s
-                """
-                result = execute_query(query, {"champion1": champion1, "champion2": champion2})
-
-                if result and len(result) > 0:
-                    row.append(round(result[0]['synergy_score'], 2))
-                else:
-                    row.append(0)  # 沒有協同資料
-
-        synergy_matrix.append(row)
-
-    return jsonify({
-        "champions": champion_ids,
-        "matrix": synergy_matrix
-    })
+    return jsonify({"error": "此API暫時停用"}), 503
 
 
 @app.route('/api/matchup-matrix', methods=['GET'])
@@ -1060,49 +1017,7 @@ def get_matchup_matrix():
               description: 錯誤訊息
               example: "找不到英雄資料"
     """
-    limit = int(request.args.get('limit', 20))
-
-    # 獲取熱門英雄
-    query = """
-        SELECT champion_id
-        FROM champion_stats
-        ORDER BY pick_rate DESC
-        LIMIT %(limit)s
-    """
-    top_champions = execute_query(query, {"limit": limit})
-
-    if not top_champions:
-        return jsonify({"error": "找不到英雄資料"}), 404
-
-    champion_ids = [champ['champion_id'] for champ in top_champions]
-
-    # 獲取這些英雄之間的對位關係
-    matchup_matrix = []
-
-    for i, champ1 in enumerate(champion_ids):
-        row = []
-        for j, champ2 in enumerate(champion_ids):
-            if i == j:  # 同一英雄，無對位資料
-                row.append(50)  # 預設為50%
-            else:
-                query = """
-                    SELECT win_rate
-                    FROM champion_matchups
-                    WHERE champion_id = %(champion1)s AND opponent_id = %(champion2)s
-                """
-                result = execute_query(query, {"champion1": champ1, "champion2": champ2})
-
-                if result and len(result) > 0:
-                    row.append(round(result[0]['win_rate'], 2))
-                else:
-                    row.append(50)  # 預設為50%
-
-        matchup_matrix.append(row)
-
-    return jsonify({
-        "champions": champion_ids,
-        "matrix": matchup_matrix
-    })
+    return jsonify({"error": "此API暫時停用"}), 503
 
 
 @app.route('/api/tier-list', methods=['GET'])

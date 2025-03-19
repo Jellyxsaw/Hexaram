@@ -50,7 +50,7 @@ class DataFetcher:
             session = self.get_champ_select_session(lock_info)
             return self.parse_session_data(session) if session else None
         except Exception as e:
-            messagebox.showerror("數據獲取錯誤", f"無法獲取即時數據\n\n錯誤：{e}\n\n請確認：\n1. 英雄聯盟是否正在運行\n2. 是否正在進行英雄選擇\n3. Lockfile 路徑是否正確 目前的lockfile路徑為{self.lockfile_path}")
+            # messagebox.showerror("數據獲取錯誤", f"無法獲取即時數據\n\n錯誤：{e}\n\n請確認：\n1. 英雄聯盟是否正在運行\n2. 是否正在進行英雄選擇\n3. Lockfile 路徑是否正確 目前的lockfile路徑為{self.lockfile_path}")
             return None
 
     def read_lockfile(self):
@@ -75,7 +75,8 @@ class DataFetcher:
             response = requests.get(url, headers=headers, verify=False, timeout=3)
             return response.json() if response.status_code == 200 else None
         except Exception as e:
-            messagebox.showerror("API 請求錯誤", f"無法連接到英雄聯盟客戶端 API\n\n錯誤：{e}\n\n請確認：\n1. 英雄聯盟是否正在運行\n2. 是否正在進行英雄選擇\n3. 客戶端是否正常運作")
+            messagebox.showerror("API 請求錯誤",
+                                 f"無法連接到英雄聯盟客戶端 API\n\n錯誤：{e}\n\n請確認：\n1. 英雄聯盟是否正在運行\n2. 是否正在進行英雄選擇\n3. 客戶端是否正常運作")
             raise Exception(f"API請求失敗: {e}")
 
     def parse_session_data(self, session):
@@ -116,7 +117,7 @@ def get_champion_mappings():
     # 優先檢查本地 JSON 文件
     champ_mapping_path = get_resource_path('champion_mapping.json')
     chinese_mapping_path = get_resource_path('chinese_mapping.json')
-    
+
     if os.path.exists(champ_mapping_path) and os.path.exists(chinese_mapping_path):
         try:
             with open(champ_mapping_path, 'r', encoding='utf-8') as f:
