@@ -598,65 +598,85 @@ class TeamCompFrame(tk.Frame):
 
     def create_live_winrate_tab(self):
         """創建即時勝率分析頁面"""
+        print("\n=== 開始創建即時勝率分析頁面 ===")
+        
         # 檢查遊戲狀態
-        if not self.fetcher or not self.fetcher.check_game_status():
+        if not self.fetcher:
+            print("錯誤: fetcher 未初始化")
+            self._create_error_display(error_message="系統未正確初始化")
+            return
+            
+        print("檢查遊戲狀態...")
+        game_status = self.fetcher.check_game_status()
+        print(f"遊戲狀態: {game_status}")
+        
+        if not game_status:
+            print("錯誤: 尚未進入遊戲")
             self._create_error_display(error_message="尚未進入遊戲")
             return
 
         # 獲取遊戲數據
-        game_data = self.fetcher.fetch_in_game_data()
+        print("\n嘗試獲取遊戲數據...")
+        try:
+            game_data = self.fetcher.fetch_in_game_data()
+            print(f"獲取到的遊戲數據: {game_data}")
+        except Exception as e:
+            print(f"獲取遊戲數據時出錯: {e}")
+            self._create_error_display(error_message="無法獲取遊戲數據")
+            return
 
         if not game_data or 'players' not in game_data:
+            print("錯誤: 遊戲數據格式不正確")
+            print(f"遊戲數據: {game_data}")
             self._create_error_display(error_message="無法獲取遊戲數據")
             return
 
         # 分離及處理雙方陣容
+        print("\n開始處理雙方陣容...")
         blue_team, red_team = self._extract_team_compositions(game_data)
+        print(f"藍方陣容: {blue_team}")
+        print(f"紅方陣容: {red_team}")
         
         # 創建團隊顯示UI
+        print("\n開始創建團隊顯示UI...")
         self._create_team_display_ui(blue_team, red_team)
-
-    def _create_error_display(self, error_message="無法獲取數據"):
-        """創建錯誤顯示"""
-        # 創建主框架
-        main_frame = RoundedFrame(
-            self.content_frame.interior,
-            bg_color="#0F172A",
-            corner_radius=self.corner_radius
-        )
-        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
-
-        # 錯誤訊息
-        status_label = tk.Label(
-            main_frame.interior,
-            text=error_message,
-            bg="#0F172A",
-            fg="#e94560",
-            font=(self.font_family, 16)
-        )
-        status_label.pack(expand=True)
+        print("=== 即時勝率分析頁面創建完成 ===\n")
 
     def _extract_team_compositions(self, game_data):
         """從遊戲數據中提取藍方和紅方陣容"""
+        print("\n=== 開始提取團隊陣容 ===")
+        
         # 分離雙方陣容
         blue_team = []
         red_team = []
         
+        print("處理玩家數據...")
         for player in game_data['players']:
+            print(f"處理玩家: {player}")
             if player['team'] == 'ORDER':
                 blue_team.append(player['championName'])
+                print(f"藍方英雄: {player['championName']}")
             else:
                 red_team.append(player['championName'])
+                print(f"紅方英雄: {player['championName']}")
 
         # 確保每隊最多 5 個英雄
         blue_team = blue_team[:5]
         red_team = red_team[:5]
         
+        print(f"\n最終陣容:")
+        print(f"藍方: {blue_team}")
+        print(f"紅方: {red_team}")
+        print("=== 團隊陣容提取完成 ===\n")
+        
         return blue_team, red_team
 
     def _create_team_display_ui(self, blue_team, red_team):
         """創建團隊顯示UI"""
+        print("\n=== 開始創建團隊顯示UI ===")
+        
         # 創建主框架
+        print("創建主框架...")
         main_frame = RoundedFrame(
             self.content_frame.interior,
             bg_color="#0F172A",
@@ -665,24 +685,32 @@ class TeamCompFrame(tk.Frame):
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # 創建雙方陣容顯示區域
+        print("創建陣容顯示區域...")
         teams_frame = tk.Frame(main_frame.interior, bg="#0F172A")
         teams_frame.pack(fill="both", expand=True, pady=10)
 
         # 創建藍方團隊框架和UI
+        print("\n創建藍方團隊框架...")
         blue_frame = self._create_team_frame(teams_frame, "藍方陣營", "#1A2744", "#0F2B5B", "left")
         
         # 創建紅方團隊框架和UI
+        print("創建紅方團隊框架...")
         red_frame = self._create_team_frame(teams_frame, "紅方陣營", "#2A1A1A", "#7F1D1D", "right")
 
         # 為藍方添加英雄卡片
+        print("\n添加藍方英雄卡片...")
         for i, champ in enumerate(blue_team):
+            print(f"添加藍方英雄 {i+1}: {champ}")
             self._create_test_champion_card(blue_frame.interior, champ, "blue", i)
 
         # 為紅方添加英雄卡片
+        print("\n添加紅方英雄卡片...")
         for i, champ in enumerate(red_team):
+            print(f"添加紅方英雄 {i+1}: {champ}")
             self._create_test_champion_card(red_frame.interior, champ, "red", i)
 
-        # 創建勝率顯示框架（預先創建並保存引用）
+        # 創建勝率顯示框架
+        print("\n創建勝率顯示框架...")
         blue_winrate_frame, blue_winrate_label = self._create_test_winrate_display(blue_frame, "blue")
         red_winrate_frame, red_winrate_label = self._create_test_winrate_display(red_frame, "red")
 
@@ -695,7 +723,9 @@ class TeamCompFrame(tk.Frame):
         }
 
         # 計算並顯示勝率預測
+        print("\n開始計算勝率預測...")
         self._calculate_team_winrates(blue_team, red_team)
+        print("=== 團隊顯示UI創建完成 ===\n")
 
     def _create_team_frame(self, parent, title_text, bg_color, title_bg_color, side):
         """創建團隊框架"""
@@ -818,6 +848,18 @@ class TeamCompFrame(tk.Frame):
             except Exception as e:
                 print(f"紅方勝率計算出錯: {e}")
                 red_winrate = 0
+
+            # 正規化勝率，使其總和為100%
+            print("\n開始正規化勝率")
+            total_winrate = blue_winrate + red_winrate
+            if total_winrate > 0:
+                blue_winrate = blue_winrate / total_winrate
+                red_winrate = red_winrate / total_winrate
+                print(f"正規化後 - 藍方勝率: {blue_winrate:.2%}, 紅方勝率: {red_winrate:.2%}")
+            else:
+                print("總勝率為0，無法進行正規化")
+                blue_winrate = 0.5  # 設置為50-50
+                red_winrate = 0.5
 
             # 更新 UI
             print("\n準備更新UI顯示")
@@ -1470,3 +1512,27 @@ class TeamCompFrame(tk.Frame):
         winrate_label.pack(fill="both", expand=True, padx=20)
         
         return winrate_frame, winrate_label
+
+    def _create_error_display(self, error_message="無法獲取數據"):
+        """創建錯誤顯示"""
+        print(f"\n=== 顯示錯誤信息: {error_message} ===")
+        
+        # 創建主框架
+        main_frame = RoundedFrame(
+            self.content_frame.interior,
+            bg_color="#0F172A",
+            corner_radius=self.corner_radius
+        )
+        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+        # 錯誤訊息
+        status_label = tk.Label(
+            main_frame.interior,
+            text=error_message,
+            bg="#0F172A",
+            fg="#e94560",
+            font=(self.font_family, 16)
+        )
+        status_label.pack(expand=True)
+        
+        print("=== 錯誤信息顯示完成 ===\n")

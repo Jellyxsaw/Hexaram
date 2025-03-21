@@ -153,23 +153,35 @@ class DataFetcher:
 
     def fetch_in_game_data(self):
         try:
+            print("開始獲取遊戲數據...")
             # 首先检查游戏状态
             lock_info = self.read_lockfile()
+            print(f"Lock 信息: {lock_info}")
+            
             gameflow_url = f"{lock_info['protocol']}://127.0.0.1:{lock_info['port']}/lol-gameflow/v1/gameflow-phase"
             auth_str = f"riot:{lock_info['password']}"
             headers = {"Authorization": f"Basic {base64.b64encode(auth_str.encode()).decode()}"}
             
+            print(f"請求遊戲狀態 URL: {gameflow_url}")
             response = requests.get(gameflow_url, headers=headers, verify=False, timeout=3)
+            print(f"遊戲狀態響應: {response.status_code}, {response.text}")
+            
             if response.status_code != 200 or response.text != '"InProgress"':
+                print("遊戲狀態檢查失敗")
                 return None
 
-            # 获取游戏数据
-            live_game_url = f"{lock_info['protocol']}://127.0.0.1:{lock_info['port']}/liveclientdata/allgamedata"
-            response = requests.get(live_game_url, headers=headers, verify=False, timeout=3)
+            # 获取游戏数据 - 使用固定的端口 2999
+            live_game_url = "https://127.0.0.1:2999/liveclientdata/allgamedata"
+            print(f"請求遊戲數據 URL: {live_game_url}")
+            response = requests.get(live_game_url, verify=False, timeout=3)
+            print(f"遊戲數據響應: {response.status_code}")
+            
             if response.status_code != 200:
+                print("獲取遊戲數據失敗")
                 return None
 
             game_data = response.json()
+            print(f"成功獲取遊戲數據")
             
             # 解析玩家信息
             players_data = []
@@ -182,12 +194,16 @@ class DataFetcher:
                 }
                 players_data.append(player_info)
 
+            print(f"成功解析玩家數據，玩家數量: {len(players_data)}")
             return {
                 'players': players_data
             }
 
         except Exception as e:
             print(f"獲取遊戲數據失敗: {e}")
+            print(f"錯誤類型: {type(e)}")
+            import traceback
+            print(f"錯誤堆棧: {traceback.format_exc()}")
             return None
 
 
