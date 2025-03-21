@@ -1,0 +1,746 @@
+{
+  "activePlayer": {
+    "abilities": {
+      "E": {
+        "abilityLevel": 0,
+        "displayName": "伊克斯塔爾衝擊",
+        "id": "SkarnerE",
+        "rawDescription": "GeneratedTip_Spell_SkarnerE_Description",
+        "rawDisplayName": "GeneratedTip_Spell_SkarnerE_DisplayName"
+      },
+      "Passive": {
+        "displayName": "震動餘波",
+        "id": "SkarnerPassive",
+        "rawDescription": "GeneratedTip_Passive_SkarnerPassive_Description",
+        "rawDisplayName": "GeneratedTip_Passive_SkarnerPassive_DisplayName"
+      },
+      "Q": {
+        "abilityLevel": 0,
+        "displayName": "翻天覆地/尖岩飛彈",
+        "id": "SkarnerQ",
+        "rawDescription": "GeneratedTip_Spell_SkarnerQ_Description",
+        "rawDisplayName": "GeneratedTip_Spell_SkarnerQ_DisplayName"
+      },
+      "R": {
+        "abilityLevel": 0,
+        "displayName": "蠍尾穿刺",
+        "id": "SkarnerR",
+        "rawDescription": "GeneratedTip_Spell_SkarnerR_Description",
+        "rawDisplayName": "GeneratedTip_Spell_SkarnerR_DisplayName"
+      },
+      "W": {
+        "abilityLevel": 0,
+        "displayName": "壁壘波動",
+        "id": "SkarnerW",
+        "rawDescription": "GeneratedTip_Spell_SkarnerW_Description",
+        "rawDisplayName": "GeneratedTip_Spell_SkarnerW_DisplayName"
+      }
+    },
+    "championStats": {
+      "abilityHaste": 0,
+      "abilityPower": 0,
+      "armor": 0,
+      "armorPenetrationFlat": 0,
+      "armorPenetrationPercent": 0,
+      "attackDamage": 25,
+      "attackRange": 0,
+      "attackSpeed": 0.625,
+      "bonusArmorPenetrationPercent": 0,
+      "bonusMagicPenetrationPercent": 0,
+      "critChance": 0,
+      "critDamage": 0,
+      "currentHealth": 630,
+      "healShieldPower": 0,
+      "healthRegenRate": 0,
+      "lifeSteal": 0,
+      "magicLethality": 0,
+      "magicPenetrationFlat": 0,
+      "magicPenetrationPercent": 0,
+      "magicResist": 0,
+      "maxHealth": 630,
+      "moveSpeed": 0,
+      "omnivamp": 0,
+      "physicalLethality": 0,
+      "physicalVamp": 0,
+      "resourceMax": 320,
+      "resourceRegenRate": 0,
+      "resourceType": "MANA",
+      "resourceValue": 320,
+      "spellVamp": 0,
+      "tenacity": 5
+    },
+    "currentGold": 0,
+    "fullRunes": {
+      "generalRunes": [
+        {
+          "displayName": "不死之握",
+          "id": 8437,
+          "rawDescription": "perk_tooltip_GraspOfTheUndying",
+          "rawDisplayName": "perk_displayname_GraspOfTheUndying"
+        },
+        {
+          "displayName": "盾擊",
+          "id": 8401,
+          "rawDescription": "perk_tooltip_ShieldBash",
+          "rawDisplayName": "perk_displayname_ShieldBash"
+        },
+        {
+          "displayName": "調節",
+          "id": 8429,
+          "rawDescription": "perk_tooltip_Conditioning",
+          "rawDisplayName": "perk_displayname_Conditioning"
+        },
+        {
+          "displayName": "過度生長",
+          "id": 8451,
+          "rawDescription": "perk_tooltip_Overgrowth",
+          "rawDisplayName": "perk_displayname_Overgrowth"
+        },
+        {
+          "displayName": "凱旋",
+          "id": 9111,
+          "rawDescription": "perk_tooltip_9111",
+          "rawDisplayName": "perk_displayname_9111"
+        },
+        {
+          "displayName": "傳奇：疾速",
+          "id": 9105,
+          "rawDescription": "perk_tooltip_9105",
+          "rawDisplayName": "perk_displayname_9105"
+        }
+      ],
+      "keystone": {
+        "displayName": "不死之握",
+        "id": 8437,
+        "rawDescription": "perk_tooltip_GraspOfTheUndying",
+        "rawDisplayName": "perk_displayname_GraspOfTheUndying"
+      },
+      "primaryRuneTree": {
+        "displayName": "意志",
+        "id": 8400,
+        "rawDescription": "perkstyle_tooltip_7204",
+        "rawDisplayName": "perkstyle_displayname_7204"
+      },
+      "secondaryRuneTree": {
+        "displayName": "精準",
+        "id": 8000,
+        "rawDescription": "perkstyle_tooltip_7201",
+        "rawDisplayName": "perkstyle_displayname_7201"
+      },
+      "statRunes": [
+        {
+          "id": 5007,
+          "rawDescription": "perk_tooltip_StatModCooldownReductionScaling"
+        },
+        {
+          "id": 5001,
+          "rawDescription": "perk_tooltip_StatModHealthScaling"
+        },
+        {
+          "id": 5001,
+          "rawDescription": "perk_tooltip_StatModHealthScaling"
+        }
+      ]
+    },
+    "level": 1,
+    "riotId": "pinkyJelly#RxMoo",
+    "riotIdGameName": "pinkyJelly",
+    "riotIdTagLine": "RxMoo",
+    "summonerName": "pinkyJelly#RxMoo",
+    "teamRelativeColors": true
+  },
+  "allPlayers": [
+    {
+      "championName": "史加納",
+      "isBot": false,
+      "isDead": false,
+      "items": [
+        {
+          "canUse": true,
+          "consumable": true,
+          "count": 1,
+          "displayName": "普羅的飼料",
+          "itemID": 2052,
+          "price": 0,
+          "rawDescription": "GeneratedTip_Item_2052_Description",
+          "rawDisplayName": "Item_2052_Name",
+          "slot": 6
+        }
+      ],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Skarner",
+      "rawSkinName": "game_character_skin_displayname_Skarner_4",
+      "respawnTimer": 0,
+      "riotId": "pinkyJelly#RxMoo",
+      "riotIdGameName": "pinkyJelly",
+      "riotIdTagLine": "RxMoo",
+      "runes": {
+        "keystone": {
+          "displayName": "不死之握",
+          "id": 8437,
+          "rawDescription": "perk_tooltip_GraspOfTheUndying",
+          "rawDisplayName": "perk_displayname_GraspOfTheUndying"
+        },
+        "primaryRuneTree": {
+          "displayName": "意志",
+          "id": 8400,
+          "rawDescription": "perkstyle_tooltip_7204",
+          "rawDisplayName": "perkstyle_displayname_7204"
+        },
+        "secondaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 4,
+      "skinName": "砂皇護衛 史加納",
+      "summonerName": "pinkyJelly#RxMoo",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "標記",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+        }
+      },
+      "team": "ORDER"
+    },
+    {
+      "championName": "卡莎碧雅",
+      "isBot": false,
+      "isDead": false,
+      "items": [],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Cassiopeia",
+      "rawSkinName": "game_character_skin_displayname_Cassiopeia_16",
+      "respawnTimer": 0,
+      "riotId": "超愛排骨酥#tw2",
+      "riotIdGameName": "超愛排骨酥",
+      "riotIdTagLine": "tw2",
+      "runes": {
+        "keystone": {
+          "displayName": "征服者",
+          "id": 8010,
+          "rawDescription": "perk_tooltip_Conqueror",
+          "rawDisplayName": "perk_displayname_Conqueror"
+        },
+        "primaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        },
+        "secondaryRuneTree": {
+          "displayName": "巫術",
+          "id": 8200,
+          "rawDescription": "perkstyle_tooltip_7202",
+          "rawDisplayName": "perkstyle_displayname_7202"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 16,
+      "skinName": "靈花祭｜珍珠白 卡莎碧雅",
+      "summonerName": "超愛排骨酥#tw2",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "鬼步",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        }
+      },
+      "team": "ORDER"
+    },
+    {
+      "championName": "維克特",
+      "isBot": false,
+      "isDead": false,
+      "items": [],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Viktor",
+      "rawSkinName": "game_character_skin_displayname_Viktor_3",
+      "respawnTimer": 0,
+      "riotId": "哭üüüüüüüüüüüüüü爸#哭üüü爸",
+      "riotIdGameName": "哭üüüüüüüüüüüüüü爸",
+      "riotIdTagLine": "哭üüü爸",
+      "runes": {
+        "keystone": {
+          "displayName": "靈魂收割",
+          "id": 8128,
+          "rawDescription": "perk_tooltip_DarkHarvest",
+          "rawDisplayName": "perk_displayname_DarkHarvest"
+        },
+        "primaryRuneTree": {
+          "displayName": "征服",
+          "id": 8100,
+          "rawDescription": "perkstyle_tooltip_7200",
+          "rawDisplayName": "perkstyle_displayname_7200"
+        },
+        "secondaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 3,
+      "skinName": "重裝狂徒 維克特",
+      "summonerName": "哭üüüüüüüüüüüüüü爸#哭üüü爸",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "虛弱",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerExhaust_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerExhaust_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        }
+      },
+      "team": "ORDER"
+    },
+    {
+      "championName": "蓋倫",
+      "isBot": false,
+      "isDead": false,
+      "items": [],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Garen",
+      "rawSkinName": "game_character_skin_displayname_Garen_5",
+      "respawnTimer": 0,
+      "riotId": "明諾優#tw2",
+      "riotIdGameName": "明諾優",
+      "riotIdTagLine": "tw2",
+      "runes": {
+        "keystone": {
+          "displayName": "征服者",
+          "id": 8010,
+          "rawDescription": "perk_tooltip_Conqueror",
+          "rawDisplayName": "perk_displayname_Conqueror"
+        },
+        "primaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        },
+        "secondaryRuneTree": {
+          "displayName": "意志",
+          "id": 8400,
+          "rawDescription": "perkstyle_tooltip_7204",
+          "rawDisplayName": "perkstyle_displayname_7204"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 5,
+      "skinName": "森林遊俠 蓋倫",
+      "summonerName": "明諾優#tw2",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "標記",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        }
+      },
+      "team": "ORDER"
+    },
+    {
+      "championName": "凱莎",
+      "isBot": false,
+      "isDead": false,
+      "items": [],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Kaisa",
+      "rawSkinName": "game_character_skin_displayname_Kaisa_16",
+      "respawnTimer": 0,
+      "riotId": "寶雲粥好吃#rika",
+      "riotIdGameName": "寶雲粥好吃",
+      "riotIdTagLine": "rika",
+      "runes": {
+        "keystone": {
+          "displayName": "致命節奏",
+          "id": 8008,
+          "rawDescription": "perk_tooltip_LethalTempo",
+          "rawDisplayName": "perk_displayname_LethalTempo"
+        },
+        "primaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        },
+        "secondaryRuneTree": {
+          "displayName": "征服",
+          "id": 8100,
+          "rawDescription": "perkstyle_tooltip_7200",
+          "rawDisplayName": "perkstyle_displayname_7200"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 16,
+      "skinName": "iG 凱莎",
+      "summonerName": "寶雲粥好吃#rika",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "鬼步",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerHaste_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerHaste_DisplayName"
+        }
+      },
+      "team": "ORDER"
+    },
+    {
+      "championName": "卡特蓮娜",
+      "isBot": false,
+      "isDead": false,
+      "items": [],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Katarina",
+      "rawSkinName": "game_character_skin_displayname_Katarina_18",
+      "respawnTimer": 0,
+      "riotId": "袂甲昏牟#8787",
+      "riotIdGameName": "袂甲昏牟",
+      "riotIdTagLine": "8787",
+      "runes": {
+        "keystone": {
+          "displayName": "征服者",
+          "id": 8010,
+          "rawDescription": "perk_tooltip_Conqueror",
+          "rawDisplayName": "perk_displayname_Conqueror"
+        },
+        "primaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        },
+        "secondaryRuneTree": {
+          "displayName": "征服",
+          "id": 8100,
+          "rawDescription": "perkstyle_tooltip_7200",
+          "rawDisplayName": "perkstyle_displayname_7200"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 18,
+      "skinName": "戰爭學院｜金黃 卡特蓮娜",
+      "summonerName": "袂甲昏牟#8787",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "標記",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+        }
+      },
+      "team": "CHAOS"
+    },
+    {
+      "championName": "薇可絲",
+      "isBot": false,
+      "isDead": false,
+      "items": [],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Vex",
+      "rawSkinName": "game_character_skin_displayname_Vex_15",
+      "respawnTimer": 0,
+      "riotId": "全力丞#0824",
+      "riotIdGameName": "全力丞",
+      "riotIdTagLine": "0824",
+      "runes": {
+        "keystone": {
+          "displayName": "靈魂收割",
+          "id": 8128,
+          "rawDescription": "perk_tooltip_DarkHarvest",
+          "rawDisplayName": "perk_displayname_DarkHarvest"
+        },
+        "primaryRuneTree": {
+          "displayName": "征服",
+          "id": 8100,
+          "rawDescription": "perkstyle_tooltip_7200",
+          "rawDisplayName": "perkstyle_displayname_7200"
+        },
+        "secondaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 15,
+      "skinName": "宇宙幻焰 薇可絲",
+      "summonerName": "全力丞#0824",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "標記",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+        }
+      },
+      "team": "CHAOS"
+    },
+    {
+      "championName": "柔依",
+      "isBot": false,
+      "isDead": false,
+      "items": [],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Zoe",
+      "rawSkinName": "game_character_skin_displayname_Zoe_5",
+      "respawnTimer": 0,
+      "riotId": "うさぎ#ヤハハ",
+      "riotIdGameName": "うさぎ",
+      "riotIdTagLine": "ヤハハ",
+      "runes": {
+        "keystone": {
+          "displayName": "靈魂收割",
+          "id": 8128,
+          "rawDescription": "perk_tooltip_DarkHarvest",
+          "rawDisplayName": "perk_displayname_DarkHarvest"
+        },
+        "primaryRuneTree": {
+          "displayName": "征服",
+          "id": 8100,
+          "rawDescription": "perkstyle_tooltip_7200",
+          "rawDisplayName": "perkstyle_displayname_7200"
+        },
+        "secondaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 5,
+      "skinName": "泳池狂歡｜湛藍 柔依",
+      "summonerName": "うさぎ#ヤハハ",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "點燃",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerDot_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerDot_DisplayName"
+        }
+      },
+      "team": "CHAOS"
+    },
+    {
+      "championName": "燼",
+      "isBot": false,
+      "isDead": false,
+      "items": [],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Jhin",
+      "rawSkinName": "game_character_skin_displayname_Jhin_13",
+      "respawnTimer": 0,
+      "riotId": "小朵露#yuizz",
+      "riotIdGameName": "小朵露",
+      "riotIdTagLine": "yuizz",
+      "runes": {
+        "keystone": {
+          "displayName": "靈魂收割",
+          "id": 8128,
+          "rawDescription": "perk_tooltip_DarkHarvest",
+          "rawDisplayName": "perk_displayname_DarkHarvest"
+        },
+        "primaryRuneTree": {
+          "displayName": "征服",
+          "id": 8100,
+          "rawDescription": "perkstyle_tooltip_7200",
+          "rawDisplayName": "perkstyle_displayname_7200"
+        },
+        "secondaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 13,
+      "skinName": "殺無赦｜薔薇粉 燼",
+      "summonerName": "小朵露#yuizz",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "虛弱",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerExhaust_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerExhaust_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        }
+      },
+      "team": "CHAOS"
+    },
+    {
+      "championName": "雷歐娜",
+      "isBot": false,
+      "isDead": false,
+      "items": [],
+      "level": 1,
+      "position": "NONE",
+      "rawChampionName": "game_character_displayname_Leona",
+      "rawSkinName": "game_character_skin_displayname_Leona_10",
+      "respawnTimer": 0,
+      "riotId": "全力水#5151",
+      "riotIdGameName": "全力水",
+      "riotIdTagLine": "5151",
+      "runes": {
+        "keystone": {
+          "displayName": "裂地衝擊",
+          "id": 8439,
+          "rawDescription": "perk_tooltip_VeteranAftershock",
+          "rawDisplayName": "perk_displayname_VeteranAftershock"
+        },
+        "primaryRuneTree": {
+          "displayName": "意志",
+          "id": 8400,
+          "rawDescription": "perkstyle_tooltip_7204",
+          "rawDisplayName": "perkstyle_displayname_7204"
+        },
+        "secondaryRuneTree": {
+          "displayName": "精準",
+          "id": 8000,
+          "rawDescription": "perkstyle_tooltip_7201",
+          "rawDisplayName": "perkstyle_displayname_7201"
+        }
+      },
+      "scores": {
+        "assists": 0,
+        "creepScore": 0,
+        "deaths": 0,
+        "kills": 0,
+        "wardScore": 0
+      },
+      "skinID": 10,
+      "skinName": "日蝕使者 雷歐娜",
+      "summonerName": "全力水#5151",
+      "summonerSpells": {
+        "summonerSpellOne": {
+          "displayName": "閃現",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerFlash_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerFlash_DisplayName"
+        },
+        "summonerSpellTwo": {
+          "displayName": "標記",
+          "rawDescription": "GeneratedTip_SummonerSpell_SummonerSnowball_Description",
+          "rawDisplayName": "GeneratedTip_SummonerSpell_SummonerSnowball_DisplayName"
+        }
+      },
+      "team": "CHAOS"
+    }
+  ],
+  "events": {
+    "Events": []
+  },
+  "gameData": {
+    "gameMode": "ARAM",
+    "gameTime": 0.022104699164629,
+    "mapName": "Map12",
+    "mapNumber": 12,
+    "mapTerrain": "Default"
+  }
+}

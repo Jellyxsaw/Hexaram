@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600">
+  <!-- 定義漸變和效果 -->
+  <defs>
+    <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F2B5B" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <linearGradient id="red-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7F1D1D" />
+      <stop offset="100%" stop-color="#EF4444" />
+    </linearGradient>
+    <linearGradient id="dark-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+    <filter id="glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feFlood flood-color="#3B82F6" flood-opacity="0.3" result="color" />
+      <feComposite in="color" in2="blur" operator="in" result="shadow" />
+      <feComposite in="SourceGraphic" in2="shadow" operator="over" />
+    </filter>
+    <filter id="glow-red" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feFlood flood-color="#EF4444" flood-opacity="0.3" result="color" />
+      <feComposite in="color" in2="blur" operator="in" result="shadow" />
+      <feComposite in="SourceGraphic" in2="shadow" operator="over" />
+    </filter>
+    <filter id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="1000" height="600" fill="#0F172A" />
+  
+  <!-- 頂部導航欄 -->
+  <rect x="0" y="0" width="1000" height="60" fill="url(#dark-gradient)" />
+  <text x="500" y="40" font-family="'Segoe UI', sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">英雄對戰</text>
+  
+  <!-- 功能按鈕 -->
+  <rect x="30" y="15" width="100" height="30" rx="15" fill="#2D3748" />
+  <text x="80" y="35" font-family="'Segoe UI', sans-serif" font-size="14" fill="white" text-anchor="middle">推薦陣容</text>
+  
+  <rect x="150" y="15" width="100" height="30" rx="15" fill="#2D3748" />
+  <text x="200" y="35" font-family="'Segoe UI', sans-serif" font-size="14" fill="white" text-anchor="middle">最不推薦陣容</text>
+  
+  <rect x="750" y="15" width="100" height="30" rx="15" fill="#2D3748" />
+  <text x="800" y="35" font-family="'Segoe UI', sans-serif" font-size="14" fill="white" text-anchor="middle">即時勝率分析</text>
+  
+  <rect x="870" y="15" width="100" height="30" rx="15" fill="#2D3748" />
+  <text x="920" y="35" font-family="'Segoe UI', sans-serif" font-size="14" fill="white" text-anchor="middle">測試即時數據</text>
+  
+  <!-- 藍方容器 -->
+  <rect x="50" y="80" width="400" height="480" rx="25" fill="#1A2744" stroke="#3B82F6" stroke-width="2" filter="url(#glow-blue)" />
+  <rect x="80" y="100" width="340" height="50" rx="15" fill="url(#blue-gradient)" />
+  <text x="250" y="135" font-family="'Segoe UI', sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">藍方陣營</text>
+  
+  <!-- 紅方容器 -->
+  <rect x="550" y="80" width="400" height="480" rx="25" fill="#2A1A1A" stroke="#EF4444" stroke-width="2" filter="url(#glow-red)" />
+  <rect x="580" y="100" width="340" height="50" rx="15" fill="url(#red-gradient)" />
+  <text x="750" y="135" font-family="'Segoe UI', sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">紅方陣營</text>
+  
+  <!-- 藍方英雄列表 -->
+  <g id="blue-heroes">
+    <!-- 英雄欄位 1 -->
+    <rect x="80" y="170" width="340" height="50" rx="10" fill="#1E293B" filter="url(#drop-shadow)" />
+    <circle cx="110" cy="195" r="20" fill="#3B5998" stroke="#5F9DF7" stroke-width="2" />
+    <text x="250" y="203" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">史坦諾</text>
+    
+    <!-- 英雄欄位 2 -->
+    <rect x="80" y="230" width="340" height="50" rx="10" fill="#1E293B" filter="url(#drop-shadow)" />
+    <circle cx="110" cy="255" r="20" fill="#3B5998" stroke="#5F9DF7" stroke-width="2" />
+    <text x="250" y="263" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">卡莎碧雅</text>
+    
+    <!-- 英雄欄位 3 -->
+    <rect x="80" y="290" width="340" height="50" rx="10" fill="#1E293B" filter="url(#drop-shadow)" />
+    <circle cx="110" cy="315" r="20" fill="#3B5998" stroke="#5F9DF7" stroke-width="2" />
+    <text x="250" y="323" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">維克特</text>
+    
+    <!-- 英雄欄位 4 -->
+    <rect x="80" y="350" width="340" height="50" rx="10" fill="#1E293B" filter="url(#drop-shadow)" />
+    <circle cx="110" cy="375" r="20" fill="#3B5998" stroke="#5F9DF7" stroke-width="2" />
+    <text x="250" y="383" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">基恩</text>
+    
+    <!-- 英雄欄位 5 -->
+    <rect x="80" y="410" width="340" height="50" rx="10" fill="#1E293B" filter="url(#drop-shadow)" />
+    <circle cx="110" cy="435" r="20" fill="#3B5998" stroke="#5F9DF7" stroke-width="2" />
+    <text x="250" y="443" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">凱特</text>
+  </g>
+  
+  <!-- 紅方英雄列表 -->
+  <g id="red-heroes">
+    <!-- 英雄欄位 1 -->
+    <rect x="580" y="170" width="340" height="50" rx="10" fill="#2D1E1E" filter="url(#drop-shadow)" />
+    <circle cx="610" cy="195" r="20" fill="#983B3B" stroke="#F75F5F" stroke-width="2" />
+    <text x="750" y="203" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">卡特蘭娜</text>
+    
+    <!-- 英雄欄位 2 -->
+    <rect x="580" y="230" width="340" height="50" rx="10" fill="#2D1E1E" filter="url(#drop-shadow)" />
+    <circle cx="610" cy="255" r="20" fill="#983B3B" stroke="#F75F5F" stroke-width="2" />
+    <text x="750" y="263" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">德萊莉</text>
+    
+    <!-- 英雄欄位 3 -->
+    <rect x="580" y="290" width="340" height="50" rx="10" fill="#2D1E1E" filter="url(#drop-shadow)" />
+    <circle cx="610" cy="315" r="20" fill="#983B3B" stroke="#F75F5F" stroke-width="2" />
+    <text x="750" y="323" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">索恩</text>
+    
+    <!-- 英雄欄位 4 -->
+    <rect x="580" y="350" width="340" height="50" rx="10" fill="#2D1E1E" filter="url(#drop-shadow)" />
+    <circle cx="610" cy="375" r="20" fill="#983B3B" stroke="#F75F5F" stroke-width="2" />
+    <text x="750" y="383" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">傳</text>
+    
+    <!-- 英雄欄位 5 -->
+    <rect x="580" y="410" width="340" height="50" rx="10" fill="#2D1E1E" filter="url(#drop-shadow)" />
+    <circle cx="610" cy="435" r="20" fill="#983B3B" stroke="#F75F5F" stroke-width="2" />
+    <text x="750" y="443" font-family="'Segoe UI', sans-serif" font-size="16" fill="white" text-anchor="middle">雷歐諾爾</text>
+  </g>
+  
+  <!-- 勝率區域 -->
+  <rect x="80" y="480" width="340" height="60" rx="10" fill="#152544" filter="url(#drop-shadow)" />
+  <text x="120" y="520" font-family="'Segoe UI', sans-serif" font-size="18" fill="white" text-anchor="start">勝率:</text>
+  <text x="330" y="520" font-family="'Segoe UI', sans-serif" font-size="24" font-weight="bold" fill="#5F9DF7" text-anchor="end">58%</text>
+  
+  <rect x="580" y="480" width="340" height="60" rx="10" fill="#441515" filter="url(#drop-shadow)" />
+  <text x="620" y="520" font-family="'Segoe UI', sans-serif" font-size="18" fill="white" text-anchor="start">勝率:</text>
+  <text x="830" y="520" font-family="'Segoe UI', sans-serif" font-size="24" font-weight="bold" fill="#F75F5F" text-anchor="end">42%</text>
+  
+  <!-- 中央 VS 標誌 -->
+  <circle cx="500" cy="300" r="45" fill="#2D3748" filter="url(#drop-shadow)" />
+  <text x="500" y="312" font-family="'Segoe UI', sans-serif" font-size="30" font-weight="bold" fill="white" text-anchor="middle">VS</text>
+</svg>

@@ -110,6 +110,86 @@ class DataFetcher:
             print(f"本地數據加載失敗: {e}")
             return None
 
+    def check_game_status(self):
+        try:
+            lock_info = self.read_lockfile()
+            gameflow_url = f"{lock_info['protocol']}://127.0.0.1:{lock_info['port']}/lol-gameflow/v1/gameflow-phase"
+            auth_str = f"riot:{lock_info['password']}"
+            headers = {"Authorization": f"Basic {base64.b64encode(auth_str.encode()).decode()}"}
+            
+            response = requests.get(gameflow_url, headers=headers, verify=False, timeout=3)
+            return response.status_code == 200 and response.text == '"InProgress"'
+        except Exception as e:
+            print(f"檢查遊戲狀態失敗: {e}")
+            return False
+        
+        
+    # 用本地檔案 in_game.json
+    
+    def fetch_test_data(self):
+        local_data_path = get_resource_path('in_game.json')
+        
+        try:
+            with open(local_data_path, 'r', encoding='utf-8') as f:
+                local_game_data = json.load(f)
+                
+                players_data = []
+                for player in local_game_data.get('allPlayers', []):
+                    player_info = {
+                        'riotIdGameName': player.get('riotIdGameName', ''),
+                        'riotIdTagLine': player.get('riotIdTagLine', ''),
+                        'championName': player.get('championName', ''),
+                        'team': player.get('team', '')
+                    }
+                    players_data.append(player_info)
+                    
+                return {
+                    'players': players_data
+                }
+                
+        except Exception as e:
+            print(f"本地數據加載失敗: {e}")
+            return None
+
+    def fetch_in_game_data(self):
+        try:
+            # 首先检查游戏状态
+            lock_info = self.read_lockfile()
+            gameflow_url = f"{lock_info['protocol']}://127.0.0.1:{lock_info['port']}/lol-gameflow/v1/gameflow-phase"
+            auth_str = f"riot:{lock_info['password']}"
+            headers = {"Authorization": f"Basic {base64.b64encode(auth_str.encode()).decode()}"}
+            
+            response = requests.get(gameflow_url, headers=headers, verify=False, timeout=3)
+            if response.status_code != 200 or response.text != '"InProgress"':
+                return None
+
+            # 获取游戏数据
+            live_game_url = f"{lock_info['protocol']}://127.0.0.1:{lock_info['port']}/liveclientdata/allgamedata"
+            response = requests.get(live_game_url, headers=headers, verify=False, timeout=3)
+            if response.status_code != 200:
+                return None
+
+            game_data = response.json()
+            
+            # 解析玩家信息
+            players_data = []
+            for player in game_data.get('allPlayers', []):
+                player_info = {
+                    'riotIdGameName': player.get('riotIdGameName', ''),
+                    'riotIdTagLine': player.get('riotIdTagLine', ''),
+                    'championName': player.get('championName', ''),
+                    'team': player.get('team', '')
+                }
+                players_data.append(player_info)
+
+            return {
+                'players': players_data
+            }
+
+        except Exception as e:
+            print(f"獲取遊戲數據失敗: {e}")
+            return None
+
 
 # ------------------ 工具函數 ------------------
 @lru_cache(maxsize=1)

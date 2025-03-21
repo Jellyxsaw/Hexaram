@@ -303,7 +303,7 @@ class TeamCompFrame(tk.Frame):
 
         # 選項卡按鈕
         self.tab_buttons = {}
-        tab_options = ["推薦陣容", "最不推薦陣容", "其他功能"]
+        tab_options = ["推薦陣容", "最不推薦陣容", "即時勝率分析", "測試即時數據"]
 
         for i, option in enumerate(tab_options):
             button = RoundedButton(
@@ -350,10 +350,12 @@ class TeamCompFrame(tk.Frame):
         # 根據選項卡顯示內容
         if tab_name == "推薦陣容":
             self.create_recommendation_tab()
-        elif tab_name == "屬性分析":
-            self.create_attribute_analysis_tab()
-        elif tab_name == "勝率預測":
-            self.create_win_rate_prediction_tab()
+        elif tab_name == "最不推薦陣容":
+            self.create_least_recommended_tab()
+        elif tab_name == "即時勝率分析":
+            self.create_live_winrate_tab()
+        elif tab_name == "測試即時數據":
+            self.create_test_data_tab()
 
     def create_recommendation_tab(self):
         """創建推薦陣容選項卡"""
@@ -594,43 +596,262 @@ class TeamCompFrame(tk.Frame):
         # 設置新字體
         label.config(font=(font_name, size))
 
-    def create_attribute_analysis_tab(self):
-        """創建屬性分析選項卡"""
-        # 使用圓角框架
-        placeholder = RoundedFrame(
+    def create_live_winrate_tab(self):
+        """創建即時勝率分析頁面"""
+        # 檢查遊戲狀態
+        if not self.fetcher or not self.fetcher.check_game_status():
+            self._create_error_display(error_message="尚未進入遊戲")
+            return
+
+        # 獲取遊戲數據
+        game_data = self.fetcher.fetch_in_game_data()
+
+        if not game_data or 'players' not in game_data:
+            self._create_error_display(error_message="無法獲取遊戲數據")
+            return
+
+        # 分離及處理雙方陣容
+        blue_team, red_team = self._extract_team_compositions(game_data)
+        
+        # 創建團隊顯示UI
+        self._create_team_display_ui(blue_team, red_team)
+
+    def _create_error_display(self, error_message="無法獲取數據"):
+        """創建錯誤顯示"""
+        # 創建主框架
+        main_frame = RoundedFrame(
             self.content_frame.interior,
-            bg_color="#0f3460",
+            bg_color="#0F172A",
             corner_radius=self.corner_radius
         )
-        placeholder.pack(expand=True, fill="both", padx=10, pady=10)
+        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
-        label = tk.Label(
-            placeholder.interior,
-            text="屬性分析頁面",
-            bg="#0f3460",
-            fg="white",
+        # 錯誤訊息
+        status_label = tk.Label(
+            main_frame.interior,
+            text=error_message,
+            bg="#0F172A",
+            fg="#e94560",
             font=(self.font_family, 16)
         )
-        label.pack(expand=True)
+        status_label.pack(expand=True)
 
-    def create_win_rate_prediction_tab(self):
-        """創建勝率預測選項卡"""
-        # 使用圓角框架
-        placeholder = RoundedFrame(
+    def _extract_team_compositions(self, game_data):
+        """從遊戲數據中提取藍方和紅方陣容"""
+        # 分離雙方陣容
+        blue_team = []
+        red_team = []
+        
+        for player in game_data['players']:
+            if player['team'] == 'ORDER':
+                blue_team.append(player['championName'])
+            else:
+                red_team.append(player['championName'])
+
+        # 確保每隊最多 5 個英雄
+        blue_team = blue_team[:5]
+        red_team = red_team[:5]
+        
+        return blue_team, red_team
+
+    def _create_team_display_ui(self, blue_team, red_team):
+        """創建團隊顯示UI"""
+        # 創建主框架
+        main_frame = RoundedFrame(
             self.content_frame.interior,
-            bg_color="#0f3460",
+            bg_color="#0F172A",
             corner_radius=self.corner_radius
         )
-        placeholder.pack(expand=True, fill="both", padx=10, pady=10)
+        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
-        label = tk.Label(
-            placeholder.interior,
-            text="勝率預測頁面",
-            bg="#0f3460",
-            fg="white",
-            font=(self.font_family, 16)
+        # 創建雙方陣容顯示區域
+        teams_frame = tk.Frame(main_frame.interior, bg="#0F172A")
+        teams_frame.pack(fill="both", expand=True, pady=10)
+
+        # 創建藍方團隊框架和UI
+        blue_frame = self._create_team_frame(teams_frame, "藍方陣營", "#1A2744", "#0F2B5B", "left")
+        
+        # 創建紅方團隊框架和UI
+        red_frame = self._create_team_frame(teams_frame, "紅方陣營", "#2A1A1A", "#7F1D1D", "right")
+
+        # 為藍方添加英雄卡片
+        for i, champ in enumerate(blue_team):
+            self._create_test_champion_card(blue_frame.interior, champ, "blue", i)
+
+        # 為紅方添加英雄卡片
+        for i, champ in enumerate(red_team):
+            self._create_test_champion_card(red_frame.interior, champ, "red", i)
+
+        # 創建勝率顯示框架（預先創建並保存引用）
+        blue_winrate_frame, blue_winrate_label = self._create_test_winrate_display(blue_frame, "blue")
+        red_winrate_frame, red_winrate_label = self._create_test_winrate_display(red_frame, "red")
+
+        # 保存引用供後續更新使用
+        self.current_winrate_display = {
+            "blue_frame": blue_frame,
+            "red_frame": red_frame,
+            "blue_label": blue_winrate_label,
+            "red_label": red_winrate_label
+        }
+
+        # 計算並顯示勝率預測
+        self._calculate_team_winrates(blue_team, red_team)
+
+    def _create_team_frame(self, parent, title_text, bg_color, title_bg_color, side):
+        """創建團隊框架"""
+        # 團隊陣容框架
+        team_frame = RoundedFrame(
+            parent,
+            bg_color=bg_color,
+            corner_radius=25,
+            width=400,
+            height=480
         )
-        label.pack(expand=True)
+        team_frame.pack(side=side, fill="both", expand=True, padx=10)
+        team_frame.pack_propagate(False)
+
+        # 標題區域
+        title_frame = RoundedFrame(
+            team_frame.interior,
+            bg_color=title_bg_color,
+            corner_radius=15,
+            height=50
+        )
+        title_frame.pack(fill="x", padx=30, pady=(20, 10))
+        title_frame.pack_propagate(False)
+
+        # 標題
+        title_label = tk.Label(
+            title_frame.interior,
+            text=title_text,
+            bg=title_bg_color,
+            fg="white",
+            font=(self.font_family_bold, 22)
+        )
+        title_label.pack(fill="both", expand=True)
+        
+        return team_frame
+
+    def create_test_data_tab(self):
+        """創建測試即時數據頁面"""
+        # 獲取測試數據
+        game_data = self.fetcher.fetch_test_data()
+        
+        if not game_data or 'players' not in game_data:
+            self._create_error_display(error_message="無法獲取測試數據")
+            return
+
+        # 分離及處理雙方陣容
+        blue_team, red_team = self._extract_team_compositions(game_data)
+        
+        # 創建團隊顯示UI
+        self._create_team_display_ui(blue_team, red_team)
+
+    def _calculate_team_winrates(self, blue_team, red_team):
+        """計算雙方陣容的勝率"""
+        # 如果沒有保存勝率顯示的引用，則不繼續執行
+        if not hasattr(self, 'current_winrate_display'):
+            print("錯誤: 勝率顯示框架未創建")
+            return
+        
+        # 在背景線程中計算勝率
+        threading.Thread(
+            target=self._calculate_team_winrates_thread,
+            args=(blue_team, red_team),
+            daemon=True
+        ).start()
+
+    def _calculate_team_winrates_thread(self, blue_team, red_team):
+        """在背景線程中計算勝率"""
+        try:
+            print("=== 開始計算團隊勝率 ===")
+            print(f"藍隊原始陣容: {blue_team}")
+            print(f"紅隊原始陣容: {red_team}")
+            
+            print("\n開始轉換英雄名稱")
+            # 轉換英雄名稱為英文
+            blue_team_en = []
+            red_team_en = []
+            
+            for champ in blue_team:
+                if self.fetcher and hasattr(self.fetcher, 'tw_mapping'):
+                    reverse_mapping = {v: k for k, v in self.fetcher.tw_mapping.items()}
+                    if champ in reverse_mapping:
+                        blue_team_en.append(reverse_mapping[champ])
+                        print(f"藍隊英雄轉換: {champ} -> {reverse_mapping[champ]}")
+                        continue
+                blue_team_en.append(champ)
+                print(f"藍隊英雄保持原樣: {champ}")
+
+            for champ in red_team:
+                if self.fetcher and hasattr(self.fetcher, 'tw_mapping'):
+                    reverse_mapping = {v: k for k, v in self.fetcher.tw_mapping.items()}
+                    if champ in reverse_mapping:
+                        red_team_en.append(reverse_mapping[champ])
+                        print(f"紅隊英雄轉換: {champ} -> {reverse_mapping[champ]}")
+                        continue
+                red_team_en.append(champ)
+                print(f"紅隊英雄保持原樣: {champ}")
+
+            print(f"\n轉換後的英雄名稱:")
+            print(f"藍隊: {blue_team_en}")
+            print(f"紅隊: {red_team_en}")
+
+            # 計算藍方勝率
+            print("\n開始計算藍方勝率")
+            try:
+                blue_result = recommend_compositions_api(blue_team_en)
+                print(f"藍方API返回結果: {blue_result}")
+                blue_winrate = blue_result[0][1] if blue_result else 0
+                print(f"藍方勝率計算結果: {blue_winrate}")
+            except Exception as e:
+                print(f"藍方勝率計算出錯: {e}")
+                blue_winrate = 0
+
+            # 計算紅方勝率
+            print("\n開始計算紅方勝率")
+            try:
+                red_result = recommend_compositions_api(red_team_en)
+                print(f"紅方API返回結果: {red_result}")
+                red_winrate = red_result[0][1] if red_result else 0
+                print(f"紅方勝率計算結果: {red_winrate}")
+            except Exception as e:
+                print(f"紅方勝率計算出錯: {e}")
+                red_winrate = 0
+
+            # 更新 UI
+            print("\n準備更新UI顯示")
+            print(f"最終結果 - 藍方勝率: {blue_winrate:.2%}, 紅方勝率: {red_winrate:.2%}")
+            self.root.after(0, lambda: self._update_winrate_display(blue_winrate, red_winrate))
+            print("已發送UI更新請求")
+
+        except Exception as e:
+            print(f"\n計算勝率時發生嚴重錯誤: {e}")
+            print("錯誤詳情:", str(e))
+            self.root.after(0, lambda: self._update_winrate_display(0, 0, error=True))
+
+    def _update_winrate_display(self, blue_winrate, red_winrate, error=False):
+        """更新勝率顯示"""
+        print("\n=== 開始更新UI顯示 ===")
+        
+        # 檢查是否有保存勝率顯示的引用
+        if not hasattr(self, 'current_winrate_display'):
+            print("錯誤: 沒有找到勝率顯示引用")
+            return
+        
+        # 直接使用保存的引用來更新勝率顯示
+        try:
+            if error:
+                self.current_winrate_display["blue_label"].config(text="勝率計算失敗")
+                self.current_winrate_display["red_label"].config(text="勝率計算失敗")
+            else:
+                self.current_winrate_display["blue_label"].config(text=f"勝率: {blue_winrate:.0%}")
+                self.current_winrate_display["red_label"].config(text=f"勝率: {red_winrate:.0%}")
+            print("勝率顯示更新成功")
+        except Exception as e:
+            print(f"更新勝率顯示時出錯: {e}")
+        
+        print("=== UI更新完成 ===\n")
 
     def load_team_comp_data(self):
         """從 API 載入陣容推薦資料"""
@@ -730,7 +951,6 @@ class TeamCompFrame(tk.Frame):
         # 獲取可用英雄（排除已選英雄）
         available_champions = [champ for champ in all_pool if champ not in selected_champions]
 
-        # 創建英雄網格
         # 創建英雄網格
         for i, champion_name in enumerate(available_champions):
             row = i // champs_per_row
@@ -994,27 +1214,25 @@ class TeamCompFrame(tk.Frame):
     def _calculate_recommendations_api(self, champion_pool):
         """使用 API 在後台執行推薦計算"""
         try:
-            # 記錄開始時間
+            print(f"開始API調用，英雄池大小: {len(champion_pool)}")
             start_time = time.time()
 
-            # 為了確保每个英雄名稱為英文，進行轉換
+            # 轉換為英文名稱
             english_champions = []
             for champion in champion_pool:
-                # 檢查是否是中文名稱，如果是則轉為英文
                 if self.fetcher and hasattr(self.fetcher, 'tw_mapping'):
-                    # 從 tw_mapping 中尋找對應的英文名稱
-                    # 轉換為 {中文: 英文} 的字典
                     reverse_mapping = {v: k for k, v in self.fetcher.tw_mapping.items()}
                     if champion in reverse_mapping:
                         english_champions.append(reverse_mapping[champion])
                         continue
-                # 如果不是中文或找不到對應的英文，則使用原名
                 english_champions.append(champion)
 
+            print(f"準備調用API，轉換後的英雄名稱: {english_champions}")
+            
             # 使用英文名稱調用 API
             sorted_compositions = recommend_compositions_api(english_champions)
+            print(f"API返回結果數量: {len(sorted_compositions) if sorted_compositions else 0}")
 
-            # 計算耗時
             elapsed = time.time() - start_time
             print(f"API 計算完成，耗時: {elapsed:.2f}秒")
 
@@ -1113,3 +1331,142 @@ class TeamCompFrame(tk.Frame):
 
             # 設置調整後的字體
             label.config(font=(font_name, size))
+
+    def _create_test_champion_card(self, parent, champion_name, team_color, index):
+        """創建英雄卡片"""
+        print(f"\n=== 開始創建英雄卡片 ===")
+        print(f"英雄名稱: {champion_name}")
+        print(f"隊伍顏色: {team_color}")
+        print(f"索引位置: {index}")
+
+        # 設置顏色
+        if team_color == "blue":
+            bg_color = "#1E293B"
+            icon_bg = "#3B5998"
+            icon_stroke = "#5F9DF7"
+        else:
+            bg_color = "#2D1E1E"
+            icon_bg = "#983B3B"
+            icon_stroke = "#F75F5F"
+
+        # 創建卡片框架
+        card_frame = RoundedFrame(
+            parent,
+            bg_color=bg_color,
+            corner_radius=10,
+            height=50
+        )
+        card_frame.pack(fill="x", padx=30, pady=5)
+        card_frame.pack_propagate(False)
+
+        # 英雄圖標框架
+        icon_frame = RoundedFrame(
+            card_frame.interior,
+            bg_color=icon_bg,
+            corner_radius=20,
+            width=40,
+            height=40
+        )
+        icon_frame.pack(side="left", padx=(10, 0), pady=5)
+        icon_frame.pack_propagate(False)
+
+        # 獲取英雄圖像
+        print("\n嘗試獲取英雄圖像:")
+        image = None
+        
+        # 先嘗試直接使用原始名稱
+        if hasattr(self.controller, 'champ_images'):
+            print("控制器中有 champ_images 屬性")
+            if champion_name in self.controller.champ_images:
+                print(f"直接找到英雄圖像: {champion_name}")
+                image = self.controller.champ_images[champion_name]
+            
+            # 如果沒有找到，嘗試使用 fetcher 轉換名稱
+            if not image and hasattr(self.fetcher, 'tw_mapping'):
+                print("嘗試使用 fetcher 轉換英雄名稱")
+                reverse_mapping = {v: k for k, v in self.fetcher.tw_mapping.items()}
+                if champion_name in reverse_mapping:
+                    english_name = reverse_mapping[champion_name]
+                    print(f"轉換後的英文名稱: {english_name}")
+                    if english_name in self.controller.champ_images:
+                        print(f"使用英文名稱找到英雄圖像: {english_name}")
+                        image = self.controller.champ_images[english_name]
+                    elif hasattr(self.fetcher, 'get_champ_key'):
+                        print("嘗試使用 fetcher 獲取英雄 key")
+                        key = self.fetcher.get_champ_key(english_name)
+                        print(f"獲取到的 key: {key}")
+                        if key in self.controller.champ_images:
+                            print(f"使用 key 找到英雄圖像: {key}")
+                            image = self.controller.champ_images[key]
+        else:
+            print("控制器中沒有 champ_images 屬性")
+
+        if image:
+            print("成功獲取到英雄圖像")
+            icon_label = tk.Label(
+                icon_frame.interior,
+                image=image,
+                bg=icon_bg,
+                borderwidth=0
+            )
+            icon_label.image = image  # 保留引用防止垃圾回收
+            icon_label.pack(fill="both", expand=True)
+        else:
+            print("未能獲取到英雄圖像，使用默認圓形")
+            # 創建默認圓形
+            icon_canvas = tk.Canvas(
+                icon_frame.interior,
+                width=40,
+                height=40,
+                bg=icon_bg,
+                highlightthickness=0
+            )
+            icon_canvas.create_oval(5, 5, 35, 35, fill=icon_bg, outline=icon_stroke)
+            icon_canvas.pack(fill="both", expand=True)
+
+        # 英雄名稱
+        display_name = self._get_display_name(champion_name)
+        print(f"顯示名稱: {display_name}")
+        
+        name_label = tk.Label(
+            card_frame.interior,
+            text=display_name,
+            bg=bg_color,
+            fg="white",
+            font=(self.font_family, 16),
+            anchor="center"
+        )
+        name_label.pack(fill="both", expand=True, padx=(20, 10))
+        
+        print("=== 英雄卡片創建完成 ===\n")
+
+    def _create_test_winrate_display(self, parent_frame, team_color):
+        """創建測試頁面的勝率顯示框架並返回框架和標籤的引用"""
+        if team_color == "blue":
+            bg_color = "#152544" 
+            fg_color = "#5F9DF7"
+        else:
+            bg_color = "#441515"
+            fg_color = "#F75F5F"
+        
+        # 勝率框架
+        winrate_frame = RoundedFrame(
+            parent_frame.interior,
+            bg_color=bg_color,
+            corner_radius=10,
+            height=60
+        )
+        winrate_frame.pack(fill="x", padx=30, pady=(10, 20))
+        winrate_frame.pack_propagate(False)
+
+        # 勝率標籤
+        winrate_label = tk.Label(
+            winrate_frame.interior,
+            text="勝率: 計算中...",
+            bg=bg_color,
+            fg=fg_color,
+            font=(self.font_family_bold, 24)
+        )
+        winrate_label.pack(fill="both", expand=True, padx=20)
+        
+        return winrate_frame, winrate_label
