@@ -16,24 +16,11 @@ def get_resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-def get_config_path():
-    """獲取配置文件的路徑，保存在用戶目錄下的特定文件夾中"""
-    # 在用戶目錄下創建一個專用於應用程式的文件夾
-    app_data_dir = os.path.join(os.path.expanduser("~"), ".lol_helper")
-    
-    # 確保目錄存在
-    if not os.path.exists(app_data_dir):
-        os.makedirs(app_data_dir)
-    
-    # 返回配置文件的完整路徑
-    return os.path.join(app_data_dir, "config.json")
-
-
 class SettingsFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="#1a1a2e")
         self.controller = controller
-        self.config_file = get_config_path()  # 使用新的函數獲取配置文件路徑
+        self.config_file = get_resource_path("config.json")
 
         # 設定初始值
         self.load_settings()
@@ -454,11 +441,8 @@ class SettingsFrame(tk.Frame):
                 'enable_cache': self.enable_cache.get()
             }
 
-            # 使用新的配置路徑函數
-            config_file_path = self.config_file
-
             # 保存到文件
-            with open(config_file_path, 'w', encoding='utf-8') as f:
+            with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, ensure_ascii=False, indent=4)
 
             # 通知主程序更新 DataFetcher

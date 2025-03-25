@@ -7,6 +7,3 @@ __pycache__
 *.rar
 sql/copyData.py
 sql/copyData.py
-sql/table_copy.log
-sql/copySingleTable.py
-sql/copySingleTable.py
