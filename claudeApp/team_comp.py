@@ -304,7 +304,8 @@ class TeamCompFrame(tk.Frame):
 
         # 選項卡按鈕
         self.tab_buttons = {}
-        tab_options = ["推薦陣容", "最不推薦陣容", "即時勝率分析", "測試即時數據"]
+        tab_options = ["推薦陣容", "最不推薦陣容", "即時勝率分析"]
+        # tab_options = ["推薦陣容", "最不推薦陣容", "即時勝率分析", "測試即時數據"]
 
         for i, option in enumerate(tab_options):
             button = RoundedButton(

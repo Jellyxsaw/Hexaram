@@ -280,3 +280,22 @@ FROM
     champions c
 LEFT JOIN
     champion_stats s ON c.champion_id = s.champion_id;
+
+-- 建立 ARAM 英雄指標表
+CREATE TABLE champion_metrics (
+    id SERIAL PRIMARY KEY,
+    champion_name VARCHAR(50) NOT NULL,  -- 英雄名稱
+    champion_key INT NOT NULL,           -- 英雄的 Riot 獨特 ID
+    avg_damage_per_min DECIMAL(10, 2),   -- 分均傷害
+    avg_damage_taken_per_min DECIMAL(10, 2),  -- 分均承傷
+    avg_healing_per_min DECIMAL(10, 2),  -- 分均治癒
+    avg_damage_mitigated_per_min DECIMAL(10, 2),  -- 分均自我減傷
+    avg_time_ccing_per_min DECIMAL(10, 2),  -- 分均控場分數
+    sample_size INT,  -- 樣本數量
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(champion_name)
+);
+
+-- 添加索引以提高查詢效率
+CREATE INDEX idx_champion_metrics_champion_name ON champion_metrics(champion_name);
+CREATE INDEX idx_champion_metrics_champion_key ON champion_metrics(champion_key);
