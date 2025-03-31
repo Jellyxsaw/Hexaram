@@ -291,7 +291,7 @@ def insert_match(conn, raw_match):
 # =========== 主流程 ===========
 def main():
     conn = get_db_connection()
-    target_matches = 1_000_000
+    target_matches = 5_000_000
     consecutive_errors = 0  # 連續錯誤計數器
 
     while count_matches(conn) < target_matches:
