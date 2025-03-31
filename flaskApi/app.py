@@ -17,8 +17,18 @@ bucket_name = config['gcs']['BUCKET_NAME']
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
+# 在 app.py 中修改 Swagger 配置
 app.config['SWAGGER'] = {
     'uiversion': 3,
+    'specs_route': '/apidocs/',
+    'openapi': '3.0.2',
+    'specs': [{
+        'endpoint': 'apispec',
+        'route': '/apispec_1.json',
+        'rule_filter': lambda rule: True,  # 所有端點
+        'model_filter': lambda tag: True,  # 所有模型
+    }],
+    'url_prefix': '/predict',  # 添加這一行，指定 API 的 URL 前綴
     'info': {
         'title': 'pinkyJelly 的 hexaram API',
         'version': '1.0.0',

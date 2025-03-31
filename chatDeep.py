@@ -24,6 +24,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLRO
 # 載入 GCS 套件（請先安裝 google-cloud-storage 套件）
 from google.cloud import storage
 
+
 # -------------------- 資源路徑輔助函式 --------------------
 def resource_path(relative_path):
     """
@@ -34,6 +35,7 @@ def resource_path(relative_path):
     except Exception:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
+
 
 # -------------------- 英雄名稱正規化類別 --------------------
 class ChampionNormalizer:
@@ -85,6 +87,7 @@ class ChampionNormalizer:
                 return self.name_map[k]
         raise ValueError(f"無法識別英雄名稱: {name}，可用名稱：{list(self.name_map.values())}")
 
+
 # -------------------- 資料讀取與處理函數 --------------------
 def fetch_data_from_pgsql():
     DATABASE_URI = "postgresql://postgres:aa030566@localhost:5432/aram"
@@ -92,6 +95,7 @@ def fetch_data_from_pgsql():
     query = "SELECT extract_data FROM model_matches WHERE game_duration > 480;"
     df = pd.read_sql(query, engine)
     return df
+
 
 def process_game_data(df):
     """
@@ -147,16 +151,18 @@ def process_game_data(df):
                 })
     return samples, champion_participant_stats
 
+
 def compute_champion_stats(champion_stats_list):
     """
     計算各英雄統計數據的歷史平均值
+    採用分批處理方式以減少記憶體使用
     """
     if not champion_stats_list:
         raise ValueError("沒有成功解析到任何英雄數據")
-    df_stats = pd.DataFrame(champion_stats_list)
-    if 'championName' not in df_stats.columns:
-        raise KeyError("資料中缺少 'championName' 欄位")
-    champion_avg = df_stats.groupby('championName').mean().reset_index()
+
+    print(f"正在處理 {len(champion_stats_list)} 筆英雄數據...")
+
+    # 定義要處理的特徵欄位
     feature_columns = [
         'kda', 'kills', 'deaths', 'assists',
         'gold_spent', 'gold_earned', 'damage_per_minute',
@@ -164,11 +170,57 @@ def compute_champion_stats(champion_stats_list):
         'damage_self_mitigated', 'time_ccing_others',
         'total_damage_shielded_on_teammates'
     ]
-    champion_avg = champion_avg[['championName'] + feature_columns]
+
+    # 初始化結果字典
+    champion_stats_aggregated = {}
+    champion_counts = {}
+
+    # 分批處理數據
+    batch_size = 100000  # 每批次處理的記錄數量
+    total_batches = (len(champion_stats_list) + batch_size - 1) // batch_size
+
+    for batch_idx in range(total_batches):
+        start_idx = batch_idx * batch_size
+        end_idx = min((batch_idx + 1) * batch_size, len(champion_stats_list))
+
+        batch = champion_stats_list[start_idx:end_idx]
+        print(f"處理批次 {batch_idx + 1}/{total_batches}，共 {len(batch)} 筆記錄")
+
+        # 批次處理
+        for record in batch:
+            champ_name = record.get('championName')
+            if not champ_name:
+                continue
+
+            # 初始化該英雄的統計數據
+            if champ_name not in champion_stats_aggregated:
+                champion_stats_aggregated[champ_name] = {feature: 0.0 for feature in feature_columns}
+                champion_counts[champ_name] = 0
+
+            # 累加每個特徵的值
+            for feature in feature_columns:
+                value = record.get(feature, 0)
+                if value is not None:  # 確保值不是 None
+                    champion_stats_aggregated[champ_name][feature] += float(value)
+
+            # 增加該英雄的計數
+            champion_counts[champ_name] += 1
+
+    # 計算平均值
     champion_stats_dict = {}
-    for _, row in champion_avg.iterrows():
-        champion_stats_dict[row['championName']] = row[feature_columns].values.astype(np.float32)
+    for champ_name, stats in champion_stats_aggregated.items():
+        count = champion_counts[champ_name]
+        if count > 0:
+            feature_values = []
+            for feature in feature_columns:
+                # 計算平均值
+                feature_values.append(stats[feature] / count)
+            champion_stats_dict[champ_name] = np.array(feature_values, dtype=np.float32)
+
+    print(f"成功計算 {len(champion_stats_dict)} 個英雄的統計數據")
+
     return champion_stats_dict, feature_columns
+
 
 def prepare_dataset_v2(samples, champion_stats_dict, feature_columns):
     """
@@ -212,6 +264,7 @@ def prepare_dataset_v2(samples, champion_stats_dict, feature_columns):
 
     return X_ids, X_stats, y, champion_to_idx, scaler
 
+
 # -------------------- 建立進階神經網路模型（優化版） --------------------
 def build_advanced_model_v2(num_champions, num_stats_features, embedding_dim=16):
     # 分支 1：英雄 ID 輸入，利用 Embedding 與 MultiHeadAttention 捕捉英雄間關聯
@@ -251,6 +304,7 @@ def build_advanced_model_v2(num_champions, num_stats_features, embedding_dim=16)
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
     model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
     return model
+
 
 # -------------------- 模型訓練與儲存（優化版） --------------------
 def train_advanced_model_v2():
@@ -301,6 +355,7 @@ def train_advanced_model_v2():
         pickle.dump(champion_stats_dict, f)
     print("進階模型與輔助資料已儲存！")
 
+
 # -------------------- GCS 下載相關函式 --------------------
 def download_blob(bucket_name, source_blob_name, destination_file_name):
     """
@@ -316,6 +371,7 @@ def download_blob(bucket_name, source_blob_name, destination_file_name):
     blob.download_to_filename(destination_file_name)
     print(f"檔案 {bucket_name}/{source_blob_name} 已下載到 {destination_file_name}")
 
+
 def download_resource_if_needed(local_path, bucket_name, gcs_blob_path):
     """
     檢查本機是否有檔案，若無則從 GCS 下載
@@ -325,6 +381,7 @@ def download_resource_if_needed(local_path, bucket_name, gcs_blob_path):
         download_blob(bucket_name, gcs_blob_path, local_path)
     else:
         print(f"{local_path} 已存在。")
+
 
 # -------------------- GCS 上傳相關函式 --------------------
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
@@ -337,6 +394,7 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 
     blob.upload_from_filename(source_file_name)
     print(f"檔案 {source_file_name} 已成功上傳到 {bucket_name}/{destination_blob_name}。")
+
 
 def upload_all_resources(bucket_name, gcs_prefix=""):
     """
@@ -357,6 +415,7 @@ def upload_all_resources(bucket_name, gcs_prefix=""):
             print(f"本機檔案 {local_path} 不存在，無法上傳。")
         else:
             upload_blob(bucket_name, local_path, destination_path)
+
 
 # -------------------- ARAM 勝率預測器類別 --------------------
 class ARAMPredictor:
@@ -468,6 +527,7 @@ class ARAMPredictor:
         predictions = self.model.predict([X_ids, X_stats])
         results = predictions[:, 0].tolist()
         return results
+
 
 # -------------------- 主程式 --------------------
 if __name__ == "__main__":
