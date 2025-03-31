@@ -1,7 +1,7 @@
 import requests
 
-PREDICT_API_URL = "https://famous-store-403215.df.r.appspot.com/predict_team"
-PREDICT_WORST_API_URL = "https://famous-store-403215.df.r.appspot.com/predict_worst_team"
+PREDICT_API_URL = "https://api.pinkyjelly.work/predict/predict_team"
+PREDICT_WORST_API_URL = "https://api.pinkyjelly.work/predict/predict_worst_team"
 
 
 def recommend_compositions_api(candidate_pool):
