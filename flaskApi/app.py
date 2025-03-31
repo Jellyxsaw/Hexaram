@@ -2,7 +2,7 @@ import configparser
 import itertools
 
 from flasgger import Swagger
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Blueprint
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from apilogger import register_api_logger
@@ -16,6 +16,9 @@ bucket_name = config['gcs']['BUCKET_NAME']
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+
+# 創建一個藍圖(Blueprint)來處理所有預測相關的路由
+predict_bp = Blueprint('predict', __name__, url_prefix='/predict')
 
 # 在 app.py 中修改 Swagger 配置
 app.config['SWAGGER'] = {
@@ -43,7 +46,7 @@ register_api_logger(app)
 predictor = ARAMPredictor(bucket_name)
 
 
-@app.route('/predict_team', methods=['POST'])
+@predict_bp.route('/predict_team', methods=['POST'])
 def predict_team():
     """
     預測隊伍勝率
@@ -113,7 +116,7 @@ def predict_team():
     return jsonify({"top_teams": result})
 
 
-@app.route('/predict_worst_team', methods=['POST'])
+@predict_bp.route('/predict_worst_team', methods=['POST'])
 def predict_worst_team():
     """
     預測最不推薦的隊伍組合
@@ -183,12 +186,7 @@ def predict_worst_team():
     return jsonify({"worst_teams": result})
 
 
-@app.route('/example', methods=['GET'])
-def example():
-    return jsonify({'message': '這是一個 API 回應'})
-
-
-@app.route('/reload_model', methods=['POST'])
+@predict_bp.route('/reload_model', methods=['POST'])
 def reload_model():
     """
     重新加載模型與資源 (需驗證密碼)
@@ -242,6 +240,11 @@ def reload_model():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/example', methods=['GET'])
+def example():
+    return jsonify({'message': '這是一個 API 回應'})
+
+
 @app.route('/_ah/warmup')
 def warmup():
     # 在此處可執行預先初始化的工作，例如重新加載模型、建立連線等
@@ -250,6 +253,9 @@ def warmup():
     # 如果有其他需要初始化的資源，也可以在這裡處理
     return 'Warmup completed', 200
 
+
+# 將藍圖註冊到應用程式
+app.register_blueprint(predict_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
