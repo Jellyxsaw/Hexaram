@@ -25,17 +25,21 @@ app.config['SWAGGER'] = {
     'specs': [{
         'endpoint': 'apispec',
         'route': '/apispec_1.json',
-        'rule_filter': lambda rule: True,  # 所有端點
-        'model_filter': lambda tag: True,  # 所有模型
+        'rule_filter': lambda rule: True,
+        'model_filter': lambda tag: True,
     }],
-    'url_prefix': '/predict',  # 添加這一行，指定 API 的 URL 前綴
+    # 關鍵修改：添加前綴，但同時也修改靜態資源路徑
+    'url_prefix': '/predict',
+    'swagger_ui_bundle_js': '/predict_flasgger_static/swagger-ui-bundle.js',
+    'swagger_ui_standalone_preset_js': '/predict_flasgger_static/swagger-ui-standalone-preset.js',
+    'jquery_js': '/predict_flasgger_static/lib/jquery.min.js',
+    'swagger_ui_css': '/predict_flasgger_static/swagger-ui.css',
     'info': {
         'title': 'pinkyJelly 的 hexaram API',
         'version': '1.0.0',
         'description': '主要開發文檔放在 https://github.com/Jellyxsaw/Hexaram/ 第一次請求會等約20秒(GAE的冷啟動) 因為成本考量沒辦法長時間創建實例請見諒'
     }
 }
-
 swagger = Swagger(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
