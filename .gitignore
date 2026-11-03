@@ -1,4 +1,4 @@
-﻿test.json
+test.json
 config.ini
 dist
 build
@@ -7,3 +7,10 @@ __pycache__
 *.rar
 sql/copyData.py
 sql/copyData.py
+
+# virtualenv / IDE / runtime artifacts
+.venv/
+venv/
+.idea/
+*.log
+claudeApp/temp/
